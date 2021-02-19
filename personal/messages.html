@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="../css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/index.css" />
+    <link rel="stylesheet" type="text/css" href="../css/custom.css">
+</head>
+<body onload="Inbox()">
+<div id="menu" align="center">
+    <table align="center" width="40%" border="0">
+        <tr>
+            <td align="center"><a onclick="CreateNewMessage();" style="cursor: pointer; cursor: hand;">New Message</a></td>
+            <td align="center"><a onclick="resetPage();Inbox();" style="cursor: pointer; cursor: hand;">Inbox</a></td>
+            <td align="center"><a onclick="resetPage();Sent();" style="cursor: pointer; cursor: hand;">Sent</a></td>
+        </tr>
+    </table>
+</div>
+<div id="resp">
+
+</div>
+<div id="list">
+</div>
+<div id="pager" align="center">
+    <a onclick="previous();" style="cursor: pointer; cursor: hand;">&laquo; Previous</a>
+    &nbsp;&nbsp;
+    <a onclick="next();" style="cursor: pointer; cursor: hand;">Next &raquo;</a>
+</div>
+<div id="holder">
+    <input type="hidden" id="page" value = "0">
+    <input type="hidden" id="title" value="non">
+    <input type="hidden" id="size" value="10">
+</div>
+<script type="text/javascript">
+    function resetPage() {
+        document.getElementById("page").value = parseInt(0);
+    }
+    function previous() {
+        var num = parseInt(document.getElementById("page").value) - 1;
+        document.getElementById("page").value = num;
+        var title = document.getElementById("title").value;
+        if(title == "Inbox"){
+            Inbox();
+        }else{
+            Sent();
+        }
+    }
+    function next() {
+        var num = parseInt(document.getElementById("page").value) + 1;
+        document.getElementById("page").value = num;
+        var title = document.getElementById("title").value;
+        if(title == "Inbox"){
+            Inbox();
+        }else{
+            Sent();
+        }
+    }
+    function CreateNewMessage() {
+        var create = "<table with=\"100%\" align=\"left\" border=\"0\">\n" +
+            "        <tr>\n" +
+            "            <td>\n" +
+            "                <input type=\"text\" placeholder=\"Email/Cell\" id=\"emailcell\">\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td>\n" +
+            "                <input type=\"text\" placeholder=\"Subject\" id=\"subject\">\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td>\n" +
+            "                <textarea id=\"body\" name=\"body\" rows=\"12\" cols=\"160\" placeholder=\"Message\"></textarea>\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td>\n" +
+            "                <input type=\"button\" value=\"Send\" class=\"button\" onclick=\"SendMessage()\">\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "    </table>";
+        document.getElementById("list").innerHTML = create;
+    }
+    function SendMessage() {
+        var rep = "";
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/messages/person/send?fromEmailcell=" +
+            sessionStorage.getItem("emailcell") + "&toEmailcell="+
+            document.getElementById("emailcell").value + "&subject="+
+            document.getElementById("subject").value + "&body="+
+            document.getElementById("body").value;
+        xhttp.onreadystatechange = function() {
+            if(this.status == 200){
+                Inbox();
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+    function Sent() {
+
+    }
+    function processViewInbox(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/messages/person/inbox/view?emailcell="+
+            sessionStorage.getItem("emailcell") + "&msgId="+ id;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    document.getElementById("emailcell").value = obj.data.fromName;
+                    document.getElementById("subject").value = obj.data.subject;
+                    document.getElementById("body").value = obj.data.body;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function viewMessage(id) {
+        var create = "<table with=\"100%\" align=\"left\" border=\"0\">\n" +
+            "        <tr>\n" +
+            "            <td>\n" +
+            "                <input type=\"text\" placeholder=\"Email/Cell\" id=\"emailcell\">\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td>\n" +
+            "                <input type=\"text\" placeholder=\"Subject\" id=\"subject\">\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td>\n" +
+            "                <textarea id=\"body\" name=\"body\" rows=\"12\" cols=\"160\" placeholder=\"Message\"></textarea>\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td>\n" +
+            "                <input type=\"button\" value=\"Reply\" class=\"button\" onclick=\"SendMessage()\">\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "    </table>";
+        document.getElementById("list").innerHTML = create;
+        processViewInbox(id);
+    }
+    function Inbox() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/messages/person/inbox?emailcell="+
+            sessionStorage.getItem("emailcell") + "&page="+
+            parseInt(document.getElementById("page").value) + "&size="+ parseInt(document.getElementById("size").value);
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"95%\">\n" +
+                        "        <tr>\n" +
+                        "            <th>From</th>\n" +
+                        "            <th>CreatedDate</th>\n" +
+                        "            <th>Subject</th>\n" +
+                        "            <th>Read</th>\n" +
+                        "            <th>Body</th>\n" +
+                        "            <th>Action</th>\n" +
+                        "        </tr>\n" +
+                        "    </thead>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].fromName + "</td>";
+                        rep += "<td>" + obj.data[c].messageDate + " | " + obj.data[c].messageTime + "</td>";
+                        rep += "<td>" + obj.data[c].subject + "</td>";
+                        rep += "<td>" + obj.data[c].messageRead + "</td>";
+                        rep += "<td>" + obj.data[c].body + "</td>";
+                        rep += "<td>"
+                        rep +="<a onclick='viewMessage("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View</a>";
+                        rep +="</td>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("list").innerHTML = rep;
+                    document.getElementById("title").value = "inbox";
+                    document.getElementById("resp").innerHTML = "";
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+</script>
+</body>
+</html>

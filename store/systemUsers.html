@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="/css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/index.css" />
+    <link rel="stylesheet" type="text/css" href="/css/custom.css" />
+</head>
+<body onload="UsersList()">
+<div id="menu">
+    <table width="70%" border="0" align="center">
+        <tr>
+            <td align="center"><a onclick="CreateAddUser();" style="cursor: pointer; cursor: hand;">Create User</a></td>
+            <td align="center"><a onclick="CreateUpdateUser();" style="cursor: pointer; cursor: hand;">Find User</a></td>
+        </tr>
+    </table>
+</div>
+<div id="sub-menu">
+
+</div>
+<div id="resp" class="error-resp" align="center">
+</div>
+<div id="systemUsersList">
+</div>
+</body>
+<script type="text/javascript">
+    function AddUser() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/system/users/add?username="+
+            sessionStorage.getItem("username") + "&addedUsername="+
+            document.getElementById("addedUsername").value + "&addedPassword="+
+            document.getElementById("password").value + "&storecode="+
+            sessionStorage.getItem("storecode") + "&firstname="+
+            document.getElementById("firstname").value + "&surname="+
+            document.getElementById("surname").value;
+        console.log(url);
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    document.getElementById("sub-menu").innerHTML = "";
+                    UsersList();
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+
+    function CreateAddUser() {
+        var rep = "<table width=\"80%\" border=\"0\" align=\"center\">\n" +
+            "            <tr>\n" +
+            "                <td><input type=\"text\" class=\"inner-txt-box\" id=\"firstname\" placeholder=\"Firstname\"></td>\n" +
+            "                    <td><input type=\"text\" class=\"inner-txt-box\" id=\"surname\" placeholder=\"Lastname\"></td>\n" +
+            "                    <td><input type=\"text\" class=\"inner-txt-box\" id=\"addedUsername\" placeholder=\"Username\"></td>\n" +
+            "                   <td><input type=\"password\" class=\"inner-txt-box\" id=\"password\" placeholder=\"Password\"></td>\n" +
+            "            </tr>\n" +
+            "            <tr>\n" +
+            "                <td colspan=\"2\" align=\"center\"><input type=\"button\" onclick=\"AddUser()\" value=\"Add User\" class=\"button\"></td>\n" +
+            "                <td colspan=\"2\" align=\"center\"><input type=\"button\" onclick=\"UsersList()\" value=\"Done\" class=\"button\"></td>\n" +
+            "            </tr>\n" +
+            "      </table>";
+        document.getElementById("sub-menu").innerHTML = rep;
+    }
+    function CreateUpdateUser() {
+        var rep = "<table width=\"80%\" border=\"0\" align=\"center\">\n" +
+            "            <tr>\n" +
+            "                <td><input type=\"text\" class=\"inner-txt-box\" id=\"firstname\" placeholder=\"Firstname\"></td>\n" +
+            "                    <td><input type=\"text\" class=\"inner-txt-box\" id=\"surname\" placeholder=\"Lastname\"></td>\n" +
+            "                    <td><input type=\"text\" class=\"inner-txt-box\" id=\"updatedUsername\" placeholder=\"Username\"></td>\n" +
+            "                   <td><input type=\"password\" class=\"inner-txt-box\" id=\"password\" placeholder=\"Password\"></td>\n" +
+            "            </tr>\n" +
+            "            <tr>\n" +
+            "                <td colspan=\"4\" align=\"center\">" +
+            "                   <input type=\"button\" onclick=\"verifyUpdate()\" value=\"Update User\" class=\"button\">\n" +
+            "                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+            "                   <input type=\"button\" onclick=\"DeleteUser()\" value=\"Delete User\" class=\"button\">\n" +
+            "                   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+            "                   <input type=\"button\" onclick=\"UsersList()\" value=\"Done\" class=\"button\"></td>\n" +
+            "            </tr>\n" +
+            "      </table>";
+        document.getElementById("sub-menu").innerHTML = rep;
+        var username = prompt("Please enter the username:");
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/system/users/find?storecode="+
+        sessionStorage.getItem("storecode") + "&username="+ username;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    document.getElementById("firstname").value = obj.data.name;
+                    document.getElementById("surname").value = obj.data.surname;
+                    document.getElementById("updatedUsername").value = obj.data.username;
+                    document.getElementById("password").value = obj.data.pin;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function verifyUpdate() {
+        var good = true;
+        var psw = document.getElementById("password").value;
+        if(psw == "*****")
+            good = false;
+        if(good == true){
+            UpdateUser();
+        }else{
+            alert("please put a correct password, then update")
+        }
+
+    }
+    function DeleteUser() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/system/users/delete?storecode="+
+        sessionStorage.getItem("storecode") + "&username="+
+        sessionStorage.getItem("username") + "&deleteUsername="+ document.getElementById("updatedUsername").value;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var rep = "Your user has been deleted";
+                document.getElementById("resp").innerHTML = rep;
+            }else if(this.status == 400){
+                var rep = "Status: " + this.status + "</br>Error :" + this.message;
+                document.getElementById("resp").innerHTML = rep;
+            }else{
+                var rep = "Status: " + obj.status + "</br>Error :" + obj.data;
+                document.getElementById("resp").innerHTML = rep;
+            }
+        };
+        xhttp.open("DELETE", url, true);
+        xhttp.send();
+    }
+
+    function UpdateUser() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/system/users/update?storecode="+
+        sessionStorage.getItem("storecode") + "&username="+
+        sessionStorage.getItem("username") + "&updatedUsername="+
+        document.getElementById("updatedUsername").value + "&password="+
+        document.getElementById("password").value;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var rep = "Your user has been updated";
+                document.getElementById("resp").innerHTML = rep;
+            }else if(this.status == 400){
+                var rep = "Status: " + this.status + "</br>Error :" + this.message;
+                document.getElementById("resp").innerHTML = rep;
+            }else{
+                var rep = "Status: " + obj.status + "</br>Error :" + obj.data;
+                document.getElementById("resp").innerHTML = rep;
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+
+    function UsersList() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/system/users/list?username="+
+        sessionStorage.getItem("username") + "&storecode="+
+        sessionStorage.getItem("storecode");
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.count > 0) {
+                    rep = "<table bgcolor=\"#f8f8ff\" border=\"2\" width=\"100%\">\n" +
+                        "        <thead>\n" +
+                        "            <tr>\n" +
+                        "                <th>Name</th>\n" +
+                        "                <th>Surname</th>\n" +
+                        "                <th>Username</th>\n" +
+                        "                <th>Pin</th>\n" +
+                        "                <th>Author</th>\n" +
+                        "                <th>CreatedDate</th>\n" +
+                        "            </tr>\n" +
+                        "        </thead>\n";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].name + "</td>";
+                        rep += "<td>" + obj.data[c].surname + "</td>";
+                        rep += "<td>" + obj.data[c].username + "</td>";
+                        rep += "<td>****</td>";
+                        rep += "<td>" + obj.data[c].author + "</td>";
+                        rep += "<td>" + obj.data[c].udate + " : " +  obj.data[c].utime+ "</td>";
+                        rep += "</tr>";
+                    }
+                    rep = rep + "</table>";
+                    document.getElementById("systemUsersList").innerHTML = rep;
+                    rep = "";
+                    document.getElementById("sub-menu").innerHTML = rep;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+</script>
+</html>

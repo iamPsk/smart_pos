@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="../css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/index.css" />
+    <link rel="stylesheet" type="text/css" href="../css/custom.css">
+</head>
+<body onload="FetchTodayList()">
+<div id="menu" align="center">
+    <table width="310x" border="2" align="center">
+        <tr >
+            <td colspan="2" align="center"><h3>Banking</h3></td>
+        </tr>
+        <tr>
+            <td><input type="text" placeholder="Amount" id="amount" name = "amount" class="inner-txt-box-med"/></td>
+            <td><input type="text" placeholder="Transaction Code" id="code" name ="code" class="inner-txt-box-med"/></td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center"><input type="text" placeholder="Transaction Description" id="description" name="description" class="inner-txt-box-large"/></td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center"><h5>
+                <input type="checkbox" name="deposit" placeholder="Deposit" id = "deposit"> Deposit
+                &nbsp;&nbsp;&nbsp;
+                <input type="checkbox" name="widraw" placeholder="Widraw" id = "widraw"> Widraw
+            </h5></td>
+        </tr>
+        <tr>
+            <td colspan="2" align="center">
+                <input type="button" onclick="Validate()" class="button" value="Process">
+            </td>
+        </tr>
+    </table>
+</div>
+<div id = "resp" align="center" class = "error-resp">
+</div>
+<div id="bank-list">
+
+</div>
+<script type="text/javascript">
+    function FetchTodayList() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/bank/today/list?username="+
+            sessionStorage.getItem("username") + "&storecode="+ sessionStorage.getItem("storecode");
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"85%\">\n" +
+                        "        <tr>\n" +
+                        "            <th>Date</th>\n" +
+                        "            <th>Username</th>\n" +
+                        "            <th>Type</th>\n" +
+                        "            <th>Code</th>\n" +
+                        "            <th>Description</th>\n" +
+                        "            <th>Amount</th>\n" +
+                        "            <th>Balance</th>\n" +
+                        "        </tr>\n" +
+                        "    </thead>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].bDate + " | " + obj.data[c].bTime;
+                        rep += "<td>" + obj.data[c].username + "</td>";
+                        rep += "<td>" + obj.data[c].transactionType + "</td>";
+                        rep += "<td>" + obj.data[c].transactionCode + "</td>";
+                        rep += "<td>" + obj.data[c].tDescription + "</td>";
+                        rep += "<td>" + obj.data[c].amount + "</td>";
+                        rep += "<td>" + obj.data[c].balance + "</td>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("bank-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function Validate() {
+        var passedTest = true;
+        var msg = "<u>Missing information</u>";
+        if(document.getElementById("deposit").checked == false && document.getElementById("widraw").checked == false) {
+            msg = msg + "</br> Select Deposit or Widraw";
+            passedTest = false;
+        }
+        if(document.getElementById("deposit").checked == true && document.getElementById("widraw").checked == true){
+            msg = msg + "</br> Select one option between Deposit and Widraw";
+            passedTest = false;
+        }
+        if(document.getElementById("amount").value == ""){
+            msg = msg + "</br> Please put a valid amount";
+            passedTest = false;
+        }
+        if(document.getElementById("code").value == ""){
+            msg = msg + "</br> Missing Transaction Code";
+            passedTest = false;
+        }
+        if(document.getElementById("description").value == ""){
+            msg = msg + "</br> Missing Transaction Description";
+            passedTest = false;
+        }
+        if(passedTest == true){
+            Process();
+        }else{
+            document.getElementById("resp").innerHTML = msg;
+        }
+    }
+    function Process() {
+        var amount = document.getElementById("amount").value;
+        var conv = -1;
+        var type;
+        if(document.getElementById("deposit").checked == true){
+            type = "Deposit";
+        }else{
+            type = "Widraw";
+            amount = amount * conv;
+        }
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/bank/store/insert?username="+
+            sessionStorage.getItem("username") + "&storecode="+
+            sessionStorage.getItem("storecode") + "&amount="+
+            amount + "&transCode="+
+            document.getElementById("code").value + "&transDescrip="+
+            document.getElementById("description").value + "&transType="+ type;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    FetchTodayList();
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+</script>
+
+</body>
+</html>

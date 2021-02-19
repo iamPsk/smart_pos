@@ -1,0 +1,1141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="img/icon.png" type = "image/x-icon">
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="/css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/index.css" />
+    <link rel="stylesheet" type="text/css" href="/css/custom.css" />
+    <script src="js/jquery.js"></script>
+</head>
+<body>
+<div id="menu">
+    <table width="85%" border="0" align="center" id="menu-table">
+        <tr>
+            <td align="center" id="menu-news-feed"><a onclick="createFilterNewsFeed();NewsFeedAll()" style="cursor: pointer; cursor: hand;">Filter NewsFeed</a></td>
+            <td align="center"><a onclick="CreateFilterItem()" style="cursor: pointer; cursor: hand;">Filter Item By Location</a></td>
+            <td align="center"><a onclick="createFilterIndustry();validateStores()" style="cursor: pointer; cursor: hand;">Filter Industry By Location</a></td>
+        </tr>
+    </table>
+</div>
+<div id="sub-menu">
+</div>
+<div id="div-list">
+</div>
+<div id="error" class="error-resp" align="center">
+</div>
+<!--
+<div id="pager" align="center">
+    <a onclick="previous();" style="cursor: pointer; cursor: hand;">&laquo; Previous</a>
+    &nbsp;&nbsp;
+    <a onclick="next();" style="cursor: pointer; cursor: hand;">Next &raquo;</a>
+</div>
+-->
+<div id="holder">
+    <input type="hidden" id="page" value = "0">
+    <input type ="hidden" id="item" value="non">
+    <input type="hidden" id="place" value="non">
+    <input type="hidden" id="size" value="1">
+    <input type="hidden" id="continentId" value="0">
+    <input type="hidden" id="countryId" value="0">
+</div>
+<script>
+    $(document).ready(function(){
+        NewsFeedAll();
+
+    });
+</script>
+<script type="text/javascript">
+
+    function changeItemToItemname() {
+        document.getElementById("item").value = "itemname";
+    }
+    function changeItemToNewsFeed() {
+        document.getElementById("item").value = "newsfeed";
+    }
+    function changeItemToIndustry() {
+        document.getElementById("item").value = "industry";
+    }
+    function SetContinentId() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/places/continent/byname?continent="+
+            document.getElementById("continents").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    document.getElementById("continentId").value = obj.data.id;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("error").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function SetCountryId() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/places/country/byname?country="+
+            document.getElementById("countries").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    document.getElementById("countryId").value = obj.data.id;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("error").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+    function GenericValidator() {
+        var subQuery="";
+        var continent = document.getElementById("continents").value;
+        var country = document.getElementById("countries").value;
+        var province = document.getElementById("provinces").value;
+        var town = document.getElementById("towns").value;
+        var location = document.getElementById("locations").value;
+        var itemname = document.getElementById("itemname").value;
+        if(itemname =="" && continent =="" && country =="" && province =="" && town =="" && location =="") {
+            subQuery = "all";
+        }else{
+            if(continent != ""){
+                SetContinentId();
+                if(subQuery == "")
+                    subQuery = " stngs.continentId="+ document.getElementById("continentId").value;
+                else
+                    subQuery += " AND stngs.continentId="+ document.getElementById("continentId").value;
+            }
+            if(country != ""){
+                SetCountryId();
+                if(subQuery == "")
+                    subQuery = " stngs.countryId="+ document.getElementById("countryId").value;
+                else
+                    subQuery += " AND stngs.countryId="+ document.getElementById("countryId").value;
+            }
+        }
+        ItemFilter(subQuery);
+    }
+    function ItemFilter(subQuery) {
+        var item = document.getElementById("itemname").value;
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v2/generic/Dynamic/Query/ItemFinder/Get?searchParam="+
+            item +"&ext="+ subQuery +"&skip=0&size=100";
+        var rep = "";
+        console.log(url);
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].picture +"' alt='photo' width='150px' height='180px'>";
+                        rep += "<br/><b>" + obj.data[c].storename ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].address;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>" +  obj.data[c].itemname;
+                        rep += "<br/>Price ZAR: " +  obj.data[c].price;
+                        rep += " | In Stock: " +  obj.data[c].quantity;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].storecode+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, false);
+        xhttp.send();
+    }
+    function CreateFilterItem() {
+        var rep ="<table width=\"70%\" border=\"0\" align=\"center\">\n" +
+            "        <tr>\n" +
+            "            <td colspan='5' align=\"center\"><input type=\"search\" id=\"itemname\" placeholder=\"Itemname\" class=\"inner-txt-box\"></td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td><input type=\"search\" id=\"continents\" placeholder=\"Continents\" class=\"inner-txt-box\"></td>\n" +
+            "            <td><input type=\"search\" id=\"countries\" placeholder=\"Countries\" class=\"inner-txt-box\"></td>\n" +
+            "            <td><input type=\"search\" id=\"provinces\" placeholder=\"Provinces/State\" class=\"inner-txt-box\"></td>\n" +
+            "            <td><input type=\"search\" id=\"towns\" placeholder=\"Towns\" class=\"inner-txt-box\"> </td>\n" +
+            "            <td><input type=\"search\" id=\"locations\" placeholder=\"Locations\" class=\"inner-txt-box\"> </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td colspan=\"5\" align=\"center\"><input type=\"button\" onclick='validateForItem()' value=\"Search\" class=\"button\"></td>\n" +
+
+            "        </tr>\n" +
+            "    </table>";
+        document.getElementById("sub-menu").innerHTML = rep;
+        document.getElementById("div-list").innerHTML = "";
+    }
+    function validateForItem() {
+        var continent = document.getElementById("continents").value;
+        var country = document.getElementById("countries").value;
+        var province = document.getElementById("provinces").value;
+        var town = document.getElementById("towns").value;
+        var location = document.getElementById("locations").value;
+        var itemname = document.getElementById("itemname").value;
+        if(itemname !="" && continent =="" && country =="" && province =="" && town =="" && location ==""){
+            document.getElementById("place").value = "all";
+            itemFilterAll();
+        }else if(itemname !="" && continent !="" && country =="" && province =="" && town =="" && location ==""){
+            document.getElementById("place").value = "continent";
+            itemFilterContinent();
+        }else if(itemname !="" && continent !="" && country !="" && province =="" && town =="" && location ==""){
+            document.getElementById("place").value = "country";
+            itemFilterCountry();
+        }else if(itemname !="" && continent !="" && country !="" && province !="" && town =="" && location ==""){
+            document.getElementById("place").value = "province";
+            itemFilterProvince();
+        }else if(itemname !="" && continent !="" && country !="" && province !="" && town !="" && location ==""){
+            document.getElementById("place").value = "town";
+            itemFilterTown();
+        }else if(itemname !="" && continent !="" && country !="" && province !="" && town !="" && location !=""){
+            document.getElementById("place").value = "location";
+            itemFilterLocation();
+        }
+    }
+    function itemFilterLocation() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/items/find/location?itemname="+
+            document.getElementById("itemname").value + "&continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value + "&province="+
+            document.getElementById("provinces").value + "&town="+
+            document.getElementById("towns").value + "&location="+
+            document.getElementById("locations").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].picture +"' alt='photo' width='150px' height='180px'>";
+                        rep += "<br/><b>" + obj.data[c].storename ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].address;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>" +  obj.data[c].itemname;
+                        rep += "<br/>Price ZAR: " +  obj.data[c].price;
+                        rep += " | In Stock: " +  obj.data[c].quantity;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].storecode+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function itemFilterTown() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/items/find/town?itemname="+
+            document.getElementById("itemname").value + "&continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value + "&province="+
+            document.getElementById("provinces").value + "&town="+
+            document.getElementById("towns").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].picture +"' alt='photo' width='150px' height='180px'>";
+                        rep += "<br/><b>" + obj.data[c].storename ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].address;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>" +  obj.data[c].itemname;
+                        rep += "<br/>Price ZAR: " +  obj.data[c].price;
+                        rep += " | In Stock: " +  obj.data[c].quantity;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].storecode+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function itemFilterProvince() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/items/find/province?itemname="+
+            document.getElementById("itemname").value + "&continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value + "&province="+
+            document.getElementById("provinces").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].picture +"' alt='photo' width='150px' height='180px'>";
+                        rep += "<br/><b>" + obj.data[c].storename ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].address;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>" +  obj.data[c].itemname;
+                        rep += "<br/>Price ZAR: " +  obj.data[c].price;
+                        rep += " | In Stock: " +  obj.data[c].quantity;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].storecode+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function itemFilterCountry() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/items/find/country?itemname="+
+            document.getElementById("itemname").value + "&continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].picture +"' alt='photo' width='150px' height='180px'>";
+                        rep += "<br/><b>" + obj.data[c].storename ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].address;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>" +  obj.data[c].itemname;
+                        rep += "<br/>Price ZAR: " +  obj.data[c].price;
+                        rep += " | In Stock: " +  obj.data[c].quantity;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].storecode+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function itemFilterContinent() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/items/find/continent?itemname="+
+            document.getElementById("itemname").value + "&continent="+
+            document.getElementById("continents").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].picture +"' alt='photo' width='150px' height='180px'>";
+                        rep += "<br/><b>" + obj.data[c].storename ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].address;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>" +  obj.data[c].itemname;
+                        rep += "<br/>Price ZAR: " +  obj.data[c].price;
+                        rep += " | In Stock: " +  obj.data[c].quantity;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].storecode+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function itemFilterAll() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/items/find/all?itemname="+
+                document.getElementById("itemname").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].picture +"' alt='photo' width='150px' height='180px'>";
+                        rep += "<br/><b>" + obj.data[c].storename ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].address;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>" +  obj.data[c].itemname;
+                        rep += "<br/>Price ZAR: " +  obj.data[c].price;
+                        rep += " | In Stock: " +  obj.data[c].quantity;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].storecode+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function viewStore(id) {
+        sessionStorage.setItem("storecode", id);
+        var redirectWindow = window.open('viewStore.html', '_self');
+    }
+    function createFilterIndustry() {
+        var rep ="<table width=\"70%\" border=\"0\" align=\"center\">\n" +
+            "        <tr>\n" +
+            "            <td><input type=\"search\" id=\"continents\" placeholder=\"Continents\" class=\"inner-txt-box\"></td>\n" +
+            "            <td><input type=\"search\" id=\"countries\" placeholder=\"Countries\" class=\"inner-txt-box\"></td>\n" +
+            "            <td><input type=\"search\" id=\"provinces\" placeholder=\"Provinces/State\" class=\"inner-txt-box\"></td>\n" +
+            "            <td><input type=\"search\" id=\"towns\" placeholder=\"Towns\" class=\"inner-txt-box\"> </td>\n" +
+            "            <td><input type=\"search\" id=\"locations\" placeholder=\"Locations\" class=\"inner-txt-box\"> </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td colspan=\"5\" align=\"center\"><input type=\"button\" onclick='validate()' value=\"Search\" class=\"button\">\n" +
+            "            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+            "<input type=\"button\" onclick='validateStores()' value=\"List\" class=\"button\"></td>\n" +
+            "        </tr>\n" +
+            "    </table>";
+        document.getElementById("sub-menu").innerHTML = rep;
+    }
+    function validateStores() {
+        var continent = document.getElementById("continents").value;
+        var country = document.getElementById("countries").value;
+        var province = document.getElementById("provinces").value;
+        var town = document.getElementById("towns").value;
+        var location = document.getElementById("locations").value;
+        if(continent =="" && country =="" && province =="" && town =="" && location ==""){
+            storesMainLoad();
+        }else if(continent !="" && country =="" && province =="" && town =="" && location ==""){
+            storesContinent();
+        }else if(continent !="" && country !="" && province =="" && town =="" && location ==""){
+            storesCountry();
+        }else if(continent !="" && country !="" && province !="" && town =="" && location ==""){
+            storesProvince();
+        }else if(continent !="" && country !="" && province !="" && town !="" && location ==""){
+            storesTown();
+        }else if(continent !="" && country !="" && province !="" && town !="" && location !=""){
+            storesLocation();
+        }
+    }
+    function storesLocation() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stores/location?continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value + "&province="+
+            document.getElementById("provinces").value + "&town="+
+            document.getElementById("towns").value + "&location="+
+            document.getElementById("locations").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].logo +"' alt='photo' width='170px' height='200px'>";
+                        rep += "<br/><b>" + obj.data[c].storeName ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].addressOne;
+                        rep += "<br/>" +  obj.data[c].addressTwo;
+                        rep += " | " +  obj.data[c].addressThree;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        rep += "</td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function storesTown() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stores/town?continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value + "&province="+
+            document.getElementById("provinces").value + "&town="+
+            document.getElementById("towns").value ;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].logo +"' alt='photo' width='170px' height='200px'>";
+                        rep += "<br/><b>" + obj.data[c].storeName ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].addressOne;
+                        rep += "<br/>" +  obj.data[c].addressTwo;
+                        rep += " | " +  obj.data[c].addressThree;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        rep += "</td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function storesProvince() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stores/province?continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value + "&province="+
+            document.getElementById("provinces").value ;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"3\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].logo +"' alt='photo' width='170px' height='200px'>";
+                        rep += "<br/><b>" + obj.data[c].storeName ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].addressOne;
+                        rep += "<br/>" +  obj.data[c].addressTwo;
+                        rep += " | " +  obj.data[c].addressThree;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        rep += "</td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function storesCountry() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stores/country?continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value ;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].logo +"' alt='photo' width='170px' height='200px'>";
+                        rep += "<br/><b>" + obj.data[c].storeName ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].addressOne;
+                        rep += "<br/>" +  obj.data[c].addressTwo;
+                        rep += " | " +  obj.data[c].addressThree;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        rep += "</td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function storesContinent() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stores/continent?continent="+
+            document.getElementById("continents").value ;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].logo +"' alt='photo' width='170px' height='200px'>";
+                        rep += "<br/><b>" + obj.data[c].storeName ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].addressOne;
+                        rep += "<br/>" +  obj.data[c].addressTwo;
+                        rep += " | " +  obj.data[c].addressThree;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        rep += "</td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function createFilterNewsFeed() {
+        var rep = "<table width=\"70%\" border=\"0\" align=\"center\">\n" +
+            "        <tr>\n" +
+            "            <td><input type=\"search\" id=\"continents\" placeholder=\"Continents\" class=\"inner-txt-box\"></td>\n" +
+            "            <td><input type=\"search\" id=\"countries\" placeholder=\"Countries\" class=\"inner-txt-box\"></td>\n" +
+            "            <td><input type=\"search\" id=\"provinces\" placeholder=\"Provinces/State\" class=\"inner-txt-box\"></td>\n" +
+            "            <td><input type=\"search\" id=\"towns\" placeholder=\"Towns\" class=\"inner-txt-box\"> </td>\n" +
+            "            <td><input type=\"search\" id=\"locations\" placeholder=\"Locations\" class=\"inner-txt-box\"> </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td colspan=\"5\" align=\"center\"><input type=\"button\" value=\"Search\" class=\"button\">\n" +
+            "        </tr>\n" +
+            "    </table>";
+        document.getElementById("sub-menu").innerHTML = rep;
+        NewsFeedAll();
+    }
+    function NewsFeedAll() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/newsfeed/all";
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class='table-filled' border='2' width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 2){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><b>" + obj.data[c].title+"</b>";
+                        rep +=  "<br/>" +obj.data[c].description;
+                        rep += "<br/>" +  obj.data[c].link;
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, false);
+        xhttp.send();
+    }
+    function storesMainLoad() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stores/all";
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class='table-filled' border='2' width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 3){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td align='center'><img src='"+ obj.data[c].logo +"' alt='photo' width='170px' height='200px'>";
+                        rep += "<br/><b>" + obj.data[c].storeName ;
+                        rep += "<br/></b>"
+                        rep +=  obj.data[c].addressOne;
+                        rep += "<br/>" +  obj.data[c].addressTwo;
+                        rep += " | " +  obj.data[c].addressThree;
+                        rep += "<br/>" +  obj.data[c].phone;
+                        rep += " | "  +  obj.data[c].email;
+                        rep += "<br/>";
+                        rep +="<a onclick='viewStore("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Store</a>";
+                        rep += "</td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function validate() {
+        var continent = document.getElementById("continents").value;
+        var country = document.getElementById("countries").value;
+        var province = document.getElementById("provinces").value;
+        var town = document.getElementById("towns").value;
+        var location = document.getElementById("locations").value;
+        if(continent =="" && country =="" && province =="" && town =="" && location ==""){
+            mainLoad();
+        }else if(continent !="" && country =="" && province =="" && town =="" && location ==""){
+            findBusinessByContinent();
+        }else if(continent !="" && country !="" && province =="" && town =="" && location ==""){
+            findBusinessByCountry();
+        }else if(continent !="" && country !="" && province !="" && town =="" && location ==""){
+            findBusinessByProvince();
+        }else if(continent !="" && country !="" && province !="" && town !="" && location ==""){
+            findBusinessByTown();
+        }else if(continent !="" && country !="" && province !="" && town !="" && location !=""){
+            findBusinessByLocation();
+        }
+    }
+    function findBusinessByLocation() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/settings/pojo/industries/summary/location?continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value + "&province="+
+            document.getElementById("provinces").value + "&town="+
+            document.getElementById("towns").value + "&location="+
+            document.getElementById("locations").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 2){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td><h4>" + obj.data[c].name ;
+                        rep += "</h4><h6>";
+                        rep += " ( ";
+                        rep +=  obj.data[c].counter;
+                        rep += " )"
+                        rep += "</h6></td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function findBusinessByTown() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/settings/pojo/industries/summary/town?continent="+
+            document.getElementById("continents").value + "&country="+
+            document.getElementById("countries").value + "&province="+
+            document.getElementById("provinces").value + "&town="+
+            document.getElementById("towns").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 2){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td><h4>" + obj.data[c].name ;
+                        rep += "</h4><h6>";
+                        rep += " ( ";
+                        rep +=  obj.data[c].counter;
+                        rep += " )"
+                        rep += "</h6></td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function findBusinessByProvince(){
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/settings/pojo/industries/summary/province?continent="+
+           document.getElementById("continents").value + "&country="+
+           document.getElementById("countries").value + "&province="+
+           document.getElementById("provinces").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 2){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td><h4>" + obj.data[c].name ;
+                        rep += "</h4><h6>";
+                        rep += " ( ";
+                        rep +=  obj.data[c].counter;
+                        rep += " )"
+                        rep += "</h6></td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function findBusinessByCountry() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/settings/pojo/industries/summary/country?continent="+
+                document.getElementById("continents").value + "&country="+
+                document.getElementById("countries").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 2){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td><h4>" + obj.data[c].name ;
+                        rep += "</h4><h6>";
+                        rep += " ( ";
+                        rep +=  obj.data[c].counter;
+                        rep += " )"
+                        rep += "</h6></td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function findBusinessByContinent() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/settings/pojo/industries/summary/continent?continent="+
+                document.getElementById("continents").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                        "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 2){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td><h4>" + obj.data[c].name ;
+                        rep += "</h4><h6>";
+                        rep += " ( ";
+                        rep +=  obj.data[c].counter;
+                        rep += " )"
+                        rep += "</h6></td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function mainLoad() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/settings/pojo/industries/summary/all";
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table class=\"table-general\" border=\"2\" width=\"100%\">\n" +
+                            "<tr>"
+                    var c;
+                    var row = 0;
+                    for(c = 0; c < obj.count; c++){
+                        if(row > 2){
+                            rep += "</tr><tr>";
+                            row = 0;
+                        }
+                        rep += "<td><h4>" + obj.data[c].name ;
+                        rep += "</h4><h6>";
+                        rep += " ( ";
+                        rep +=  obj.data[c].counter;
+                        rep += " )"
+                        rep += "</h6></td>";
+                        row++;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("div-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("div-list").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+</script>
+<script type="text/javascript" src="js/HttpRequest.js"></script>
+<script type="text/javascript" src="js/boot2.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+<script type="text/javascript" src="js/Custom.js"></script>
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport"
+          content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+    <link rel="stylesheet" type="text/css" href="css/min.css" />
+    <link rel="stylesheet" type="text/css" href="css/index.css" />
+    <link rel="stylesheet" type="text/css" href="css/custom.css" />
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="img/icon.png" type = "image/x-icon">
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" style="cursor: pointer; cursor: hand;" href="index.html">Home</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" style="cursor: pointer; cursor: hand;" href="personalLoggin.html">Personal</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+<div class="form-layout">
+    <form class="login-form">
+        <header>
+            <div>
+                <span class="icon material-icons">login</span>
+            </div>
+            <h1 class="login-header">
+                Welcome!
+                <span class="header">
+                        Log in to your Store
+                    </span>
+            </h1>
+        </header>
+        <div class="igroup">
+            <label for="storecode">StoreCode</label>
+            <input type="text" id="storecode" aria-describedby="emailHelp">
+            <span class="material-icons">business</span>
+        </div>
+        <div class="igroup">
+            <label for="username">Username</label>
+            <input type="email" id="username" aria-describedby="emailHelp">
+            <span class="material-icons">person</span>
+        </div>
+        <div class="igroup">
+            <label for="exampleInputPassword1">Password</label>
+            <input type="password" id="exampleInputPassword1">
+        </div>
+        <input type="submit" value="Login" onclick="Loggin()">
+    </form>
+</div>
+<div id = "resp" class="error-resp" align="center">
+</div>
+<br/>
+<div class="footer">
+    <div class="footer-column">
+        <div class="footer-card">
+            <p>Copyright &copy;MkokoComputers (Pty) Ltd.</p>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function Loggin() {
+        var xhttp = new XMLHttpRequest();
+        var username = document.getElementById("username").value;
+        var password = document.getElementById("exampleInputPassword1").value;
+        var storecode = document.getElementById("storecode").value
+        var url = sessionStorage.getItem("host") + "/api/v1/system/users/loggin?storecode=" + storecode +"&username="
+            + username + "&pin="+ password;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    sessionStorage.setItem("username",obj.data.username);
+                    sessionStorage.setItem("storecode", obj.data.storeCode);
+                    var redirectWindow = window.open('/store/businessHome.html', '_self');
+                } else {
+                    document.getElementById("resp").innerHTML = "<p align='center'>Incorrect Loggin details</p>";
+                }
+            }else{
+                var rep = "Status: " + obj.status + "</br>Code :" + obj.error;
+                document.getElementById("resp").innerHTML = rep;
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+</script>
+<script type="text/javascript" src="js/HttpRequest.js"></script>
+<script type="text/javascript" src="js/boot2.min.js"></script>
+<script type="text/javascript" src="js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/index.js"></script>
+</body>
+</html>

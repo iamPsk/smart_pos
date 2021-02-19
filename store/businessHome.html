@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport"
+          content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+    <link rel="stylesheet" type="text/css" href="/css/min.css" />
+    <link rel="stylesheet" type="text/css" href="/css/index.css" />
+    <link rel="stylesheet" type="text/css" href="/css/custom.css" />
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+</head>
+<body>
+<nav class="navbar navbar-expand-md navbar-dark bg-dark">
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+            aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <ul class="navbar-nav mr-auto">
+            <li class="nav-item active">
+                <a class="nav-link" style="cursor: pointer; cursor: hand;" href="index.html">Home</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" style="cursor: pointer; cursor: hand;" href="businessLoggin.html">Administration</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" style="cursor: pointer; cursor: hand;" href="businessLoggin.html">Displays</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" style="cursor: pointer; cursor: hand;" href="businessLoggin.html">Communication</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" style="cursor: pointer; cursor: hand;" href="businessLoggin.html">Finance</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" style="cursor: pointer; cursor: hand;" href="businessLoggin.html">Reports</a>
+            </li>
+            <li class="nav-item active">
+                <a class="nav-link" style="cursor: pointer; cursor: hand;" href="businessLoggin.html">Settings</a>
+            </li>
+        </ul>
+        <div class="dropmenu">
+            <button class="dropbtn" onclick="myFunction()"><span class="material-icons" style="margin:0">person</span>Sifiso Mkoko
+                <span>&blacktriangledown;</span>
+            </button>
+            <div class="dropmenu-content" id="myDropdown">
+                <a href="#">Logout</a>
+            </div>
+        </div>
+    </div>
+</nav>
+<h1>Welcome to business home</h1>
+
+<div class="footer">
+    <div class="footer-column">
+        <div class="footer-card">
+            <p>Copyright &copy;MkokoComputers (Pty) Ltd.</p>
+        </div>
+    </div>
+</div>
+
+
+    <script type="text/javascript">
+        function myFunction() {
+            document.getElementById("myDropdown").classList.toggle("show");
+        }
+        function Home() {
+            var myStoreFrame = "<iframe src=\"wallpaper.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function Menus() {
+            var myStoreFrame = "<iframe src=\"menus.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function Specials() {
+            var myStoreFrame = "<iframe src=\"specials.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function Banking() {
+            var myStoreFrame = "<iframe src=\"banking.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function BankReport() {
+            var myStoreFrame = "<iframe src=\"bankReport.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function SystemUsers() {
+            var myStoreFrame = "<iframe src=\"systemUsers.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function SalesReport() {
+            var myStoreFrame = "<iframe src=\"salesReport.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function Messages() {
+            var myStoreFrame = "<iframe src=\"messages.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function Orders() {
+            var myStoreFrame = "<iframe src=\"orders.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function settings() {
+            var myStoreFrame = "<iframe src=\"settings.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function stockitems() {
+            var myStoreFrame = "<iframe src=\"stockitems.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+        function ItemHistory() {
+            var myStoreFrame = "<iframe src=\"itemsHistory.html\" scrolling=\"yes\" height=\"78%\" width=\"96%\"\n" +
+                "            name=\"iframe_index\" title=\"SmartPOS\" style=\"display: block;\"></iframe>";
+            document.getElementById('for-frame').innerHTML = myStoreFrame;
+        }
+
+    </script>
+    <script type="text/javascript" src="../js/HttpRequest.js"></script>
+    <script type="text/javascript" src="../js/boot2.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/index.js"></script>
+</body>
+</html>

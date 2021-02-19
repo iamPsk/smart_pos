@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="/css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/index.css" />
+    <link rel="stylesheet" type="text/css" href="/css/custom.css" />
+
+</head>
+
+<body onload="FetchStoreSetting(), FetchBankDetails()">
+<div align="center">
+    <h2>Business Properties</h2>
+</div>
+
+<div id="sub-menu" align="center">
+    <table width="600px" border="2" align="center">
+        <tr>
+            <td>Continent</td>
+            <td><input type="search" id="continent" placeholder="Continent" class ="inner-txt-box"></td>
+            <td>Phone</td>
+            <td><input type="search" id="phone" placeholder="Phone" class ="inner-txt-box"></td>
+        </tr>
+        <tr>
+            <td>Country</td>
+            <td><input type="search" id="country" placeholder="Country" class ="inner-txt-box"></td>
+            <td>Fax</td>
+            <td><input type="search" id="fax" placeholder="Fax" class ="inner-txt-box"></td>
+        </tr>
+        <tr>
+            <td>Province/State</td>
+            <td><input type="search" id="province" placeholder="Province" class ="inner-txt-box"></td>
+            <td>Email</td>
+            <td><input type="search" id="email" placeholder="Email" class ="inner-txt-box"></td>
+        </tr>
+        <tr>
+            <td>Town</td>
+            <td><input type="search" id="town" placeholder="Town" class ="inner-txt-box"></td>
+            <td>Website</td>
+            <td><input type="search" id="website" placeholder="Website" class ="inner-txt-box"></td>
+        </tr>
+        <tr>
+            <td>Location</td>
+            <td><input type="search" id="location" placeholder="Location" class ="inner-txt-box"></td>
+            <td>TaxNumber</td>
+            <td><input type="search" id="taxnumber" placeholder="Tax Number" class ="inner-txt-box"></td>
+        </tr>
+        <tr>
+            <td>Industry</td>
+            <td><input type="search" id="industry" placeholder="Industry" class ="inner-txt-box"></td>
+            <td>Package</td>
+            <td><input type="search" id="package"  placeholder="Package" class ="inner-txt-box" disabled></td>
+        </tr>
+        <tr>
+            <td align="center" colspan="4"><input type="button" onclick="Save()" value="Save" class="button">
+                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                <input type="button" value="Upgrade Package" class="button">
+            </td>
+        </tr>
+    </table>
+</div>
+<div align="center" id="bankTitle">
+    <h2>Bank Properties</h2>
+</div>
+<div id="bank-properties" align="center">
+    <table width="600px" border="2" align="center">
+        <tr>
+            <td>Acc.Holder</td>
+            <td><input type="text" id="accHolder" placeholder="AccountHolder" class ="inner-txt-box"></td>
+            <td>Acc.Number</td>
+            <td><input type="text" id="accNumber" placeholder="AccountNumber" class ="inner-txt-box"></td>
+        </tr>
+        <tr>
+            <td>Acc.Type</td>
+            <td><input type="text" placeholder="AccountType" id="accType" class ="inner-txt-box"></td>
+            <td>Bank</td>
+            <td><input type="text" id="bank" placeholder="bank" class ="inner-txt-box"></td>
+        </tr>
+        <tr>
+            <td>Code</td>
+            <td><input type="text" placeholder="BranchCode" id="branchCode" class ="inner-txt-box"></td>
+            <td>Ref</td>
+            <td><input type="text" id="ref" placeholder="PaymentRef e.g: email,cell" class ="inner-txt-box"></td>
+        </tr>
+        <tr>
+            <td align="center" colspan="4"><input type="button" onclick="SaveBank()" value="Save Bank" class="button">
+            </td>
+        </tr>
+    </table>
+</div>
+<div id="resp" class="error-resp" align="center">
+</div>
+<div id="bank-list" align="center">
+</div>
+</body>
+<script type="text/javascript">
+    function FetchBankDetails() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/store/bank/details/get?username="+
+            sessionStorage.getItem("username") + "&storecode="+ sessionStorage.getItem("storecode");
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"90%\">\n" +
+                        "        <tr>\n" +
+                        "            <th>CreatedDate</th>\n" +
+                        "            <th>AccountHolder</th>\n" +
+                        "            <th>AccountNumber</th>\n" +
+                        "            <th>AccountType</th>\n" +
+                        "            <th>Bank</th>\n" +
+                        "            <th>Branch</th>\n" +
+                        "            <th>PaymentRef</th>\n" +
+                        "            <th>Action</th>\n" +
+                        "        </tr>\n" +
+                        "    </thead>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].bDate + " | " + obj.data[c].bTime;
+                        rep += "<td>" + obj.data[c].accountHolder + "</td>";
+                        rep += "<td>" + obj.data[c].accountNumber + "</td>";
+                        rep += "<td>" + obj.data[c].accountType + "</td>";
+                        rep += "<td>" + obj.data[c].bank + "</td>";
+                        rep += "<td>" + obj.data[c].branch + "</td>";
+                        rep += "<td>" + obj.data[c].paymentRef + "</td>";
+                        rep += "<td>";
+                        rep +="<a onclick='DeleteBank("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>Remove Bank</a>";
+                        rep += "</td>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("bank-list").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("sub-menu").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function DeleteBank(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/store/bank/details/remove?username="+
+            sessionStorage.getItem("username") + "&storecode="+
+            sessionStorage.getItem("storecode") + "&bankId="+ id;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    FetchBankDetails();
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("DELETE", url, true);
+        xhttp.send();
+    }
+
+    function SaveBank() {
+            var xhttp = new XMLHttpRequest();
+            var url = sessionStorage.getItem("host") + "/api/v1/store/bank/details/insert?username="+
+                sessionStorage.getItem("username") +"&storecode="+
+                sessionStorage.getItem("storecode") + "&accountHolder="+
+                document.getElementById("accHolder").value + "&accountNumber="+
+                document.getElementById("accNumber").value + "&accountType="+
+                document.getElementById("accType").value + "&bank="+
+                document.getElementById("bank").value + "&branch="+
+                document.getElementById("branchCode").value + "&paymentRef="+
+                document.getElementById("ref").value;
+            var rep = "";
+            xhttp.onreadystatechange = function() {
+                if (this.status == 200) {
+                    var response = xhttp.responseText;
+                    var obj = JSON.parse(response);
+                    if (obj.success == true) {
+                        FetchBankDetails();
+                    } else {
+                        rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                        document.getElementById("resp").innerHTML = rep;
+                    }
+                }
+            };
+            xhttp.open("PUT", url, true);
+            xhttp.send();
+    }
+
+    function Save() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/general/store/settings/update?storecode=" +
+            sessionStorage.getItem("storecode")+"&username="+
+            sessionStorage.getItem("username") +"&continent="+
+            document.getElementById("continent").value + "&country="+
+            document.getElementById("country").value + "&province="+
+            document.getElementById("province").value + "&town=" +
+            document.getElementById("town").value + "&location="+
+            document.getElementById("location").value + "&industry="+
+            document.getElementById("industry").value + "&phone=" +
+            document.getElementById("phone").value + "&fax=" +
+            document.getElementById("fax").value + "&email="+
+            document.getElementById("email").value +  "&website="+
+            document.getElementById("website").value + "&taxnumber=" + document.getElementById("taxnumber").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                        FetchStoreSetting();
+                    } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+
+    function FetchStoreSetting() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/general/store/settings/get?strorecode="+
+            sessionStorage.getItem("storecode");
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        document.getElementById("continent").value  = obj.data.continent;
+                        document.getElementById("country").value = obj.data.country;
+                        document.getElementById("province").value = obj.data.province;
+                        document.getElementById("town").value = obj.data.town;
+                        document.getElementById("location").value = obj.data.location;
+                        document.getElementById("industry").value = obj.data.industry;
+                        document.getElementById("phone").value = obj.data.phone;
+                        document.getElementById("fax").value = obj.data.fax;
+                        document.getElementById("email").value = obj.data.email;
+                        document.getElementById("website").value = obj.data.website;
+                        document.getElementById("taxnumber").value = obj.data.taxnumber;
+                        document.getElementById("package").value = obj.data.storePackage;
+                    }
+
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+</script>
+</html>

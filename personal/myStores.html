@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="../css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/index.css" />
+    <link rel="stylesheet" type="text/css" href="../css/custom.css">
+
+</head>
+<body onload="LoadMyStore()">
+<br/>
+
+<div id="addStore" align="center">
+    <table width="45%" border="0" align="center">
+        <tr>
+            <td align="center"><input type="button" class="button" value="Create Store" onclick="createStore()"/></td>
+            <td align="center"><input type="button" class="button" value="Update Store" onclick="createUpdateStore()"/></td>
+            <td align="center"><input type="button" class="button" value="Delete Store" onclick="deleteStore()"/></td>
+        </tr>
+    </table>
+</div>
+<div id = "newStore" align="center">
+
+</div>
+<div id="resp" align="center" class="error-resp">
+</div>
+<div id="storeList">
+</div>
+
+<script type="text/javascript">
+    function deleteStore() {
+        if(window.confirm("You are about to delete a store! are you sure of your action?")){
+            var xhttp = new XMLHttpRequest();
+            var storecode = prompt("Please enter the storecode to be deleted!","0");
+            var url = sessionStorage.getItem("host") +"/api/v1/stores/delete?emailcell="+
+                sessionStorage.getItem("emailcell") + "&storecode=" + storecode;
+            var rep;
+            xhttp.onreadystatechange = function() {
+                if (this.status == 200) {
+                    var response = xhttp.responseText;
+                    var obj = JSON.parse(response);
+                    if (obj.success == true) {
+                        document.getElementById("resp").innerHTML = "";
+                        LoadMyStore();
+                    } else {
+                        rep = "Success: " + obj.success + " Code: " + obj.code + "<br/>Error Message: " + obj.data;
+                        document.getElementById("resp").innerHTML = rep;
+                    }
+                }
+            };
+            xhttp.open("DELETE", url, true);
+            xhttp.send();
+        }else{
+            alert("he said no");
+        }
+    }
+
+    function createUpdateStore() {
+        var newStore = "<table border=\"2\" width=\"210px\">\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id = \"storename\" placeholder=\"store name\" class=\"inner-txt-box\"/></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id = \"addressone\" placeholder=\"address one\" class=\"inner-txt-box\"/></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id = \"addresstwo\" placeholder=\"address two\" class=\"inner-txt-box\"/></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id = \"addressthree\" placeholder=\"address three\" class=\"inner-txt-box\"/></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"button\" onclick=\"updateStore()\" value=\"Update Store\" class=\"main-button\"/></td>\n" +
+            "    </tr>\n" +
+            "</table>";
+        document.getElementById("newStore").innerHTML = newStore;
+        populateUpdateStore();
+    }
+    function updateStore() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host")+"/api/v1/stores/mystore/update?storecode="+
+            sessionStorage.getItem("storecode") + "&storeName="+
+            document.getElementById("storename").value + "&emailcell="+
+            sessionStorage.getItem("emailcell") + "&addressOne="+
+            document.getElementById("addressone").value + "&addressTwo="+
+            document.getElementById("addresstwo").value + "&addressThree="+
+            document.getElementById("addressthree").value;
+        var rep="";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    document.getElementById("newStore").innerHTML = rep;
+                    LoadMyStore();
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "<br/>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+    function populateUpdateStore() {
+        var xhttp = new XMLHttpRequest();
+        var storeId = prompt("Please enter your store Id");
+        var url = sessionStorage.getItem("host")+"/api/v1/stores/my/store?storecode="+
+            storeId + "&emailcell="+
+            sessionStorage.getItem("emailcell") ;
+        sessionStorage.setItem("storecode", storeId);
+        var rep;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    document.getElementById("storename").value = obj.data.storeName;
+                    document.getElementById("addressone").value = obj.data.addressOne;
+                    document.getElementById("addresstwo").value = obj.data.addressTwo;
+                    document.getElementById("addressthree").value = obj.data.addressThree;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "<br/>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function createStore() {
+        var newStore = "<table border=\"2\" width=\"210px\">\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id = \"storename\" placeholder=\"store name\" class=\"inner-txt-box\"/></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id = \"addressone\" placeholder=\"address one\" class=\"inner-txt-box\"/></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id = \"addresstwo\" placeholder=\"address two\" class=\"inner-txt-box\"/></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id = \"addressthree\" placeholder=\"address three\" class=\"inner-txt-box\"/></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"button\" onclick=\"NewStore()\" value=\"Add Store\" class=\"main-button\"/></td>\n" +
+            "    </tr>\n" +
+            "</table>";
+        document.getElementById("newStore").innerHTML = newStore;
+    }
+    function NewStore() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host")+"/api/v1/stores/insertStore?storeName="+
+            document.getElementById("storename").value+"&emailcell="+
+            sessionStorage.getItem("emailcell")+"&addressOne="+
+            document.getElementById("addressone").value+"&addressTwo="+
+            document.getElementById("addresstwo").value+"&addressThree="+document.getElementById("addressthree").value;
+        var rep;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    document.getElementById("newStore").innerHTML = "";
+                    TermsAndConditions();
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "<br/>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+    function TermsAndConditions() {
+        var newStore = "<p><b>Your store has been added.Please NOTE!</b><br/> \n" +
+            "   Our site is still under development, registered stores will subscribe to free packages,<br/>\n"+
+            "   and the data captured will not go our production, for now we are running more test on our systems.<br/>\n"+
+            "   But the functionality will not change.<br/><br/>\n" +
+            "   <b>Please go to home page, then business:</b> <br/>\n"+
+            "   username: is your Firstname<br/>\n"+
+            "   password: is your password<br/>\n"+
+            "   storecode: will appear on your stores list<br/>\n"+
+            "   Make sure you log in to you store, go to settings, settings then put your business location details.<br/>\n" +
+            "   For your store to be performing at its best.\n" +
+            "   <br/><input type='button' class='button' value='OK' onclick='LoadMyStore()'></p>";
+        document.getElementById("newStore").innerHTML = newStore;
+    }
+    function LoggInToStore(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") +"/api/v1/person/find/emailcell?emailcell="+ sessionStorage.getItem("emailcell");
+        var rep;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    sessionStorage.setItem("username", obj.data.firstname);
+                    sessionStorage.setItem("storecode", id);
+                    var redirectWindow = window.open('/store/businessHome.html', '_self');
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+    function LoadMyStore() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stores/my/stores?emailcell=" + sessionStorage.getItem("emailcell");
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                        rep = "<table border='2' width=\"95%\" align='center' class='table-general'>\n" +
+                            "        <thead>\n" +
+                            "        <tr>\n" +
+                            "            <th>StoreName</th>\n" +
+                            "            <th>StoreCode</th>\n" +
+                            "            <th>Address</th>\n" +
+                            "            <th>Package</th>\n" +
+                            "            <th>CreatedDate</th>\n" +
+                            "            <th>Action</th>\n" +
+                            "        </tr>\n" +
+                            "        </thead>\n" +
+                            "        <tbody>";
+                        var c;
+                        for(c = 0; c < obj.count; c++){
+                            rep += "<tr>";
+                            rep += "<td>" + obj.data[c].storeName + "</td>";
+                            rep += "<td>" + obj.data[c].id + "</td>";
+                            rep += "<td>" + obj.data[c].addressOne +", " + obj.data[c].addressTwo + ", " +obj.data[c].addressThree+ "</td>";
+                            rep += "<td>" + obj.data[c].storePackage + "</td>";
+                            rep += "<td>" + obj.data[c].createDate + "</td>";
+                            rep += "<td>";
+                            rep +="<a onclick='LoggInToStore("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>Loggin</a>";
+                            rep +="</td>";
+                            rep += "</tr>";
+                        }
+                        rep = rep + "</tbody>\n" +
+                            "    </table>";
+                        document.getElementById("storeList").innerHTML = rep;
+                        document.getElementById("newStore").innerHTML = "";
+                    }else{
+                        rep = "You do not have any stores";
+                        document.getElementById("storeList").innerHTML = rep;
+                    }
+                } else {
+                    //rep = "Success: False <br/>Code: " + this.status + "<br/>Error Message: "+ this.message;
+                    //document.getElementById("resp").innerHTML = rep;
+                }
+            };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+</script>
+</body>
+</html>

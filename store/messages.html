@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="../css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/index.css" />
+    <link rel="stylesheet" type="text/css" href="../css/custom.css">
+
+</head>
+<body onload="FetchList()">
+<div id="menu" align="center">
+    <p></br><input type="button" value="Inbox" class="button" onclick="FetchList()"></p>
+</div>
+<div id="sub-menu" align="center">
+
+</div>
+<div id="message-list">
+</div>
+<script type="text/javascript">
+    function ViewSender(id){
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/messages/store/inbox/sender?messageId="+
+           id + "&storecode="+ sessionStorage.getItem("storecode");
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<p align='center'>Name: " + obj.data.firstname;
+                    rep += " " + obj.data.surname + "</br>";
+                    rep += "Phone: " + obj.data.cell + "</br>";
+                    rep += "Email: " + obj.data.email;
+                    rep += "</br><input type='button' class='button' value='OK' onclick='FetchList()'"
+                    rep += "</p>"
+                    document.getElementById("sub-menu").innerHTML = rep;
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("sub-menu").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function InsertViewMessage(text) {
+        document.getElementById("body").value = text;
+    }
+    function ViewMessage(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/messages/store/inbox/view?storecode="+
+            sessionStorage.getItem("storecode") + "&messageId="+ id;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<textarea id=\"body\" name=\"body\" cols=\"120\" rows=\"8\"></textarea>";
+                    var msg = obj.data.body;
+                    document.getElementById("sub-menu").innerHTML = rep;
+                    InsertViewMessage(msg);
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function FetchList() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/messages/store/inbox/list?storecode="+
+            sessionStorage.getItem("storecode") + "&page=0&size=50";
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"95%\">\n" +
+                        "        <tr>\n" +
+                        "            <th>CreatedDate</th>\n" +
+                        "            <th>Subject</th>\n" +
+                        "            <th>Read</th>\n" +
+                        "            <th>Body</th>\n" +
+                        "            <th>Action</th>\n" +
+                        "        </tr>\n" +
+                        "    </thead>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                            rep += "<style='color:red'>";
+                            rep += "<td>" + obj.data[c].messageDate + " | " + obj.data[c].messageTime + "</td>";
+                            rep += "<td>" + obj.data[c].subject + "</td>";
+                            rep += "<td>" + obj.data[c].messageRead + "</td>";
+                            rep += "<td>" + obj.data[c].body + "</td>";
+                            rep += "<td>"
+                        rep +="<a onclick='ViewMessage("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View</a>";
+                        rep += " | ";
+                        rep +="<a onclick='ViewSender("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>Sender</a>";
+                        rep +="</td>";
+                        rep += "</style>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("message-list").innerHTML = rep;
+                    document.getElementById("sub-menu").innerHTML = "";
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+</script>
+</body>
+</html>

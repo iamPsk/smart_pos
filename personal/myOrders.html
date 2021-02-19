@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="../css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="../css/index.css" />
+    <link rel="stylesheet" type="text/css" href="../css/custom.css">
+
+</head>
+<body onload="fetchList()">
+<br/>
+<div id="menu">
+    <table align="center" width="50%" border="0">
+        <tr>
+            <td align="center"><input type="button" value="Pending" class="button" onclick="resetPage();fetchList()"></td>
+            <td align="center"><input type="button" value="In-Progress" class="button" onclick="resetPage();fetchInProgress()"></td>
+            <td align="center"><input type="button" value="History" class="button" onclick="resetPage();fetchHistory()"></td>
+        </tr>
+    </table>
+</div>
+<div id="resp" align="center">
+</div>
+<div id="my-orders-list" align="center">
+</div>
+<div id="pager" align="center">
+    <a onclick="previous();" style="cursor: pointer; cursor: hand;">&laquo; Previous</a>
+    &nbsp;&nbsp;
+    <a onclick="next();" style="cursor: pointer; cursor: hand;">Next &raquo;</a>
+</div>
+<div id="holder">
+    <input type="hidden" id="page" value = "0">
+    <input type="hidden" id="title" value="non">
+    <input type="hidden" id="size" value="10">
+</div>
+<script type="text/javascript">
+    function resetPage() {
+        document.getElementById("page").value = parseInt(0);
+    }
+    function previous() {
+        var num = parseInt(document.getElementById("page").value) - 1;
+        document.getElementById("page").value = num;
+        var title = document.getElementById("title").value;
+        if(title == "pending"){
+            fetchList();
+        }else if(title == "progress"){
+            fetchInProgress();
+        }else if(title == "history") {
+            fetchHistory();
+        }
+    }
+    function next() {
+        var num = parseInt(document.getElementById("page").value) + 1;
+        document.getElementById("page").value = num;
+        var title = document.getElementById("title").value;
+        if(title == "pending"){
+            fetchList();
+        }else if(title == "progress"){
+            fetchInProgress();
+        }else{
+            fetchHistory();
+        }
+    }
+    function fetchHistory() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/orders/myorders/history?emailcell="+
+            sessionStorage.getItem("emailcell")  + "&page="+
+            parseInt(document.getElementById("page").value) + "&size="+ parseInt(document.getElementById("size").value);
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"95%\">\n" +
+                        "        <tr>\n" +
+                        "            <th>StoreName</th>\n" +
+                        "            <th>CreatedDate</th>\n" +
+                        "            <th>Sent</th>\n" +
+                        "            <th>Received</th>\n" +
+                        "            <th>Accepted</th>\n" +
+                        "            <th>Total</th>\n" +
+                        "            <th>Notes</th>\n" +
+                        "            <th>Action</th>\n" +
+                        "        </tr>\n" +
+                        "    </thead>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].storename + "</td>";
+                        rep += "<td>" + obj.data[c].orderDate + " | " + obj.data[c].orderTime + "</td>";
+                        rep += "<td>" + obj.data[c].sent + "</td>";
+                        rep += "<td>" + obj.data[c].received + "</td>";
+                        rep += "<td>" + obj.data[c].accepted + "</td>";
+                        rep += "<td>R: " + obj.data[c].total + "</td>";
+                        rep += "<td>" + obj.data[c].notes + "</td>";
+                        rep += "<td>"
+                        rep +="<a onclick='viewItemsForHistory("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Item(s)</a>";
+                        rep +="</td>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("my-orders-list").innerHTML = rep;
+                    document.getElementById("title").value = "history";
+                    document.getElementById("resp").innerHTML = "";
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function fetchInProgress() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/orders/myorders/inprogress?emailcell="+
+            sessionStorage.getItem("emailcell") + "&page=0&size="+ parseInt(document.getElementById("size").value);
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"95%\">\n" +
+                        "        <tr>\n" +
+                        "            <th>StoreName</th>\n" +
+                        "            <th>CreatedDate</th>\n" +
+                        "            <th>Sent</th>\n" +
+                        "            <th>Received</th>\n" +
+                        "            <th>Accepted</th>\n" +
+                        "            <th>Total</th>\n" +
+                        "            <th>Action</th>\n" +
+                        "        </tr>\n" +
+                        "    </thead>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].storename + "</td>";
+                        rep += "<td>" + obj.data[c].orderDate + " | " + obj.data[c].orderTime + "</td>";
+                        rep += "<td>" + obj.data[c].sent + "</td>";
+                        rep += "<td>" + obj.data[c].received + "</td>";
+                        rep += "<td>" + obj.data[c].accepted + "</td>";
+                        rep += "<td>R: " + obj.data[c].total + "</td>";
+                        rep += "<td>"
+                        rep +="<a onclick='viewItemsForHistory("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Item(s)</a>";
+                        rep += "  |  ";
+                        rep +="<a onclick='ViewBankDetails("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>Bank Details</a>";
+                        rep += "  |  ";
+                        rep +="<a onclick='ViewNotes("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Notes</a>";
+
+                        rep +="</td>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("my-orders-list").innerHTML = rep;
+                    document.getElementById("title").value = "progress";
+                    document.getElementById("resp").innerHTML = "";
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+
+    }
+    function removeOrderItem(orderId,id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/orders/myorder/items/remove?emailcell=" +
+            sessionStorage.getItem("emailcell") + "&orderId="+
+            orderId + "&orderItemId=" + id;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    viewItems(orderId);
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("DELETE", url, true);
+        xhttp.send();
+    }
+    function viewItemsForHistory(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/orders/myorder/items/list?emailcell="+
+            sessionStorage.getItem("emailcell") + "&orderId=" + id;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"95%\">\n" +
+                        "        <tr>\n" +
+                        "            <th>BarCode</th>\n" +
+                        "            <th>ItemName</th>\n" +
+                        "            <th>Quantity</th>\n" +
+                        "            <th>Price</th>\n" +
+                        "        </tr>\n" +
+                        "    </thead>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].barcode + "</td>";
+                        rep += "<td>" + obj.data[c].itemname  + "</td>";
+                        rep += "<td> " + "1" + "</td>";
+                        rep += "<td>" + obj.data[c].price + "</td>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("my-orders-list").innerHTML = rep;
+                    document.getElementById("resp").innerHTML = "";
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function ViewNotes(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/orders/myOrder?emailcell="+
+            sessionStorage.getItem("emailcell") + "&orderId=" + id;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"350px\">\n";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr><td><b>Notes</b></td></tr>";
+                        rep += "<tr><td>" + obj.data.notes + "</td></tr>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("my-orders-list").innerHTML = rep;
+                    document.getElementById("resp").innerHTML = "";
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+    function ViewBankDetails(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/store/bank/details/for/payment?orderId=" + id;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"350px\">\n";
+                    var c;
+                    var bank = 1;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr><td><b>"+ bank +". Bank</b></td></tr>";
+                        rep += "<tr><td>AccountHolder: " + obj.data[c].accountHolder + "</td></tr>";
+                        rep += "<tr><td>AccountNumber: " + obj.data[c].accountNumber + "</td></tr>";
+                        rep += "<tr><td>AccountType: " + obj.data[c].accountType + "</td></tr>";
+                        rep += "<tr><td>Bank: " + obj.data[c].bank + "</td></tr>";
+                        rep += "<tr><td>Branch: " + obj.data[c].branch + "</td></tr>";
+                        rep += "<tr><td>PaymentFef: " + obj.data[c].paymentRef + "</td></tr>";
+                        bank += 1;
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("my-orders-list").innerHTML = rep;
+                    document.getElementById("resp").innerHTML = "";
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+    function viewItems(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/orders/myorder/items/list?emailcell="+
+            sessionStorage.getItem("emailcell") + "&orderId=" + id;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"95%\">\n" +
+                        "        <tr>\n" +
+                        "            <th>BarCode</th>\n" +
+                        "            <th>ItemName</th>\n" +
+                        "            <th>Quantity</th>\n" +
+                        "            <th>Price</th>\n" +
+                        "            <th>Action</th>\n" +
+                        "        </tr>\n" +
+                        "    </thead>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].barcode + "</td>";
+                        rep += "<td>" + obj.data[c].itemname  + "</td>";
+                        rep += "<td> " + "1" + "</td>";
+                        rep += "<td>" + obj.data[c].price + "</td>";
+                        rep += "<td>"
+                        rep +="<a onclick='removeOrderItem("+ id +","+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>Remove Item</a>";
+
+                        rep +="</td>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("my-orders-list").innerHTML = rep;
+                    document.getElementById("resp").innerHTML = "";
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function sendOrder(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/orders/myorder/send?emailcell=" +
+            sessionStorage.getItem("emailcell") + "&orderId="+ id + "&page=0&size="+ parseInt(document.getElementById("size").value);
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    fetchList();
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+    function deleteOrder(id) {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/orders/myorder/delete?emailcell=" +
+            sessionStorage.getItem("emailcell") + "&orderId="+ id + "&page=0&size="+ parseInt(document.getElementById("size").value);
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    fetchList();
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("DELETE", url, true);
+        xhttp.send();
+    }
+    function fetchList() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/orders/myorders?emailcell="+
+            sessionStorage.getItem("emailcell") + "&page="+
+            document.getElementById("page").value + "&size="+ parseInt(document.getElementById("size").value);
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"95%\">\n" +
+                        "        <tr>\n" +
+                        "            <th>StoreName</th>\n" +
+                        "            <th>CreatedDate</th>\n" +
+                        "            <th>SentStatus</th>\n" +
+                        "            <th>Total</th>\n" +
+                        "            <th>Action</th>\n" +
+                        "        </tr>\n" +
+                        "    </thead>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].storename + "</td>";
+                        rep += "<td>" + obj.data[c].orderDate + " | " + obj.data[c].orderTime + "</td>";
+                        rep += "<td>" + obj.data[c].sent + "</td>";
+                        rep += "<td>" + obj.data[c].total + "</td>";
+                        rep += "<td>"
+                        rep +="<a onclick='viewItems("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>View Item(s)</a>";
+                        rep += " | ";
+                        rep +="<a onclick='sendOrder("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>Send Order</a>";
+                        rep += " | ";
+                        rep +="<a onclick='deleteOrder("+obj.data[c].id+");' style='cursor: pointer; cursor: hand; color: blue;'>Delete Order</a>";
+                        rep +="</td>";
+                    }
+                    rep += "</tr>";
+                    rep += "</table>";
+                    document.getElementById("my-orders-list").innerHTML = rep;
+                    document.getElementById("title").value = "pending";
+                    document.getElementById("resp").innerHTML = "";
+                } else {
+                    rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+</script>
+</body>
+</html>

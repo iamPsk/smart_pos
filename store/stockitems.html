@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+    <meta charset="utf-8" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <!-- This is a wide open CSP declaration. To lock this down for production, see below. -->
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="/css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/index.css" />
+    <link rel="stylesheet" type="text/css" href="/css/custom.css" />
+</head>
+<body onload="myload()">
+<div id="menu">
+<table width="70%" border="0" align="center">
+    <tr>
+        <td align="center"><a onclick="createItem();" style="cursor: pointer; cursor: hand;">Create Item</a></td>
+        <td align="center"><a onclick="AddItem();" style="cursor: pointer; cursor: hand;">Add Item</a></td>
+        <td align="center"><a onclick="FindItem();" style="cursor: pointer; cursor: hand;">Find Item</a></td>
+        <td align="center"><a onclick="UpdateItem();" style="cursor: pointer; cursor: hand;">Update Item</a></td>
+    </tr>
+</table>
+</div>
+<div id="sub-menu">
+
+</div>
+<div id="resp" class="error-resp" align="center">
+</div>
+<div id="stockitems" align="center">
+</div>
+<script type="text/javascript">
+
+    function UpdateItem() {
+        var itemcode = prompt("Enter the Item Barcode");
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stockitems/find/item?storecode="
+            + sessionStorage.getItem("storecode") +"&barcode="+ itemcode;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    var rep = "<table width=\"80%\" align=\"center\" border=\"0\">\n" +
+                        "        <tr>\n" +
+                        "            <td align=\"center\"><input type=\"search\" id=\"department\" value="+ obj.data.department +" class = \"inner-txt-box\"></td>\n" +
+
+                        "            <td align=\"center\"><input type=\"search\" id=\"category\" value="+ obj.data.category +" class = \"inner-txt-box\"></td>\n" +
+
+                        "            <td align=\"center\"><input type=\"text\" id=\"itemname\" value="+ obj.data.itemname +" class = \"inner-txt-box\"></td>\n" +
+                        "            <td align=\"right\"><input type=\"text\" id=\"barcode\" value="+ obj.data.barCode +" class = \"inner-txt-box\"></td>\n" +
+                        "        </tr>\n" +
+                        "        <tr>\n" +
+                        "            <td align=\"left\" ><input type=\"text\" id=\"description\" value="+ obj.data.description +" class = \"inner-txt-box\">\n" +
+                        "                </td>\n" +
+                        "                <td align=\"center\">\n" +
+                        "                <input type=\"text\" id=\"vat\" value="+ obj.data.vat +" class=\"inner-txt-box\"></td>\n" +
+                        "            <td colspan=\"2\" align=\"right\">\n" +
+                        "                <input type=\"text\" id=\"stockprice\" value="+ obj.data.stockprice +" class=\"inner-txt-box-small\">\n" +
+                        "                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+                        "                <input type=\"text\" id=\"sellingprice\" value="+ obj.data.sellingprice +" class=\"inner-txt-box-small\">\n" +
+                        "                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+                        "                <input type=\"text\" id=\"quantity\" value="+ obj.data.quantity +" class=\"inner-txt-box-small\">\n" +
+                        "            </td>\n" +
+                        "        </tr>\n" +
+                        "        <tr>\n" +
+                        "            <td align=\"left\">\n" +
+                        "                <input type=\"text\" id=\"lowlevel\" value="+ obj.data.lowlevel +" class=\"inner-txt-box\">\n" +
+                        "            </td><td align=\"center\">\n" +
+                        "                <input type=\"text\" id=\"location\" value="+ obj.data.location +" class=\"inner-txt-box\">\n" +
+                        "            </td><td align=\"center\">\n" +
+                        "                <input type=\"text\" id=\"shelfnumber\" value="+ obj.data.shelfnumber +" class=\"inner-txt-box\">\n" +
+                        "            </td><td align=\"right\">\n" +
+                        "                <input type=\"text\" id=\"supplier\" value="+ obj.data.supplier +" class=\"inner-txt-box\">\n" +
+                        "            </td>\n" +
+                        "        </tr>\n" +
+                        "        <tr>\n" +
+                        "            <td colspan=\"2\" align=\"center\"><input type=\"button\" onclick='Update()' value=\"Update\" class=\"button\"></td>\n" +
+                        "            <td colspan=\"2\" align=\"center\"><input type=\"button\" onclick='subMenuDone()' value=\"Done\" class=\"button\"></td>\n" +
+                        "        </tr>\n" +
+                        "    </table>";
+                    document.getElementById("sub-menu").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+
+    function Update() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stockitems/item/update?"
+            + "storeid=" + sessionStorage.getItem("storecode")
+            + "&username=" + sessionStorage.getItem("username")
+            +"&department="+ document.getElementById("department").value
+            +"&category="+ document.getElementById("category").value
+            +"&itemname="+ document.getElementById("itemname").value
+            +"&description="+ document.getElementById("description").value
+            +"&vat="+ document.getElementById("vat").value
+            +"&barcode="+ document.getElementById("barcode").value
+            +"&stockprice="+ document.getElementById("stockprice").value
+            +"&sellingprice="+ document.getElementById("sellingprice").value
+            +"&quantity="+ document.getElementById("quantity").value
+            +"&lowlevel="+ document.getElementById("lowlevel").value
+            +"&location="+ document.getElementById("location").value
+            +"&shelfNumber="+ document.getElementById("shelfnumber").value
+            +"&supplier=" + document.getElementById("supplier").value;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var rep = "Your Item has been updated";
+                document.getElementById("resp").innerHTML = rep;
+            }else if(this.status == 400){
+                var rep = "Status: " + this.status + "</br>Error :" + this.message;
+                document.getElementById("resp").innerHTML = rep;
+            }else{
+                var rep = "Status: " + obj.status + "</br>Error :" + obj.data;
+                document.getElementById("resp").innerHTML = rep;
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+
+    function FindItem() {
+        var rep = "<table width=\"70%\" border=\"0\" align=\"center\">\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id=\"barcode\" value=\"Barcode\" class=\"inner-txt-box\"></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\">\n" +
+            "            <input type=\"button\" class=\"button\" value=\"Search\" onclick=\"find()\">\n" +
+            "            &nbsp;&nbsp;&nbsp;\n" +
+            "            <input type=\"button\" class=\"button\" value=\"De-Activate\" onclick=\"DeActivate()\">\n" +
+            "            &nbsp;&nbsp;&nbsp;\n" +
+            "            <input type=\"button\" class=\"button\" value=\"Activate\" onclick=\"Activate()\">\n" +
+            "            &nbsp;&nbsp;&nbsp;\n" +
+            "            <input type=\"button\" class=\"button\" value=\"Done\" onclick=\"subMenuDone()\"></td>\n" +
+            "    </tr>\n" +
+            "</table>";
+        document.getElementById("sub-menu").innerHTML = rep;
+    }
+    function Activate() {
+        var rep = "";
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stockitems/item/activate?storecode="
+            + sessionStorage.getItem("storecode") +"&username="
+            + sessionStorage.getItem("username") + "&barcode="+ document.getElementById("barcode").value;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "Your Item has been activated";
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }else{
+                rep = "An error has occured, please contact your administrator";
+                document.getElementById("resp").innerHTML = rep;
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+    function DeActivate() {
+        var rep = "";
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stockitems/item/deactivate?storecode="
+            + sessionStorage.getItem("storecode") +"&username="
+            + sessionStorage.getItem("username") + "&barcode="+ document.getElementById("barcode").value;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "Your Item has been de-activated";
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }else{
+                rep = "An error has occured, please contact your administrator";
+                document.getElementById("resp").innerHTML = rep;
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+    function find() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stockitems/find/item?storecode="+ sessionStorage.getItem("storecode") +"&barcode="+ document.getElementById("barcode").value;
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.count > 0) {
+                    rep = "<table bgcolor='#f8f8ff' width=\"100%\" border=\"2\">\n" +
+                        "        <thead>\n" +
+                        "        <tr>\n" +
+                        "            <th>DEPARTMENT</th>\n" +
+                        "            <th>Category</th>\n" +
+                        "            <th>Itemname</th>\n" +
+                        "            <th>Description</th>\n" +
+                        "            <th>Vat</th>\n" +
+                        "            <th>BarCode</th>\n" +
+                        "            <th>StockPrice</th>\n" +
+                        "            <th>SellingPrice</th>\n" +
+                        "            <th>Quantity</th>\n" +
+                        "            <th>LowLevel</th>\n" +
+                        "            <th>Location</th>\n" +
+                        "            <th>ShelfNumber</th>\n" +
+                        "            <th>Supplier</th>\n" +
+                        "        </tr>\n" +
+                        "        </thead>\n" +
+                        "        <tbody>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data.department + "</td>";
+                        rep += "<td>" + obj.data.category + "</td>";
+                        rep += "<td>" + obj.data.itemname + "</td>";
+                        rep += "<td>" + obj.data.description + "</td>";
+                        rep += "<td>" + obj.data.vat + "</td>";
+                        rep += "<td>" + obj.data.barCode + "</td>";
+                        rep += "<td>" + obj.data.stockprice + "</td>";
+                        rep += "<td>" + obj.data.sellingprice + "</td>";
+                        rep += "<td>" + obj.data.quantity + "</td>";
+                        rep += "<td>" + obj.data.lowlevel + "</td>";
+                        rep += "<td>" + obj.data.location + "</td>";
+                        rep += "<td>" + obj.data.shelfnumber + "</td>";
+                        rep += "<td>" + obj.data.supplier + "</td>";
+                        rep += "</tr>";
+                    }
+                    rep = rep + "</tbody>\n" +
+                        "    </table>";
+                    document.getElementById("stockitems").innerHTML = rep;
+                }else{
+                    rep = "Sorry but that Item does not exist";
+                    document.getElementById("stockitems").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+    function AddItem() {
+        var rep = "<table width=\"70%\" border=\"0\" align=\"center\">\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id=\"barcode\" alt=\"Barcode\" placeholder=\"Barcode\" class=\"inner-txt-box\"></td>\n" +
+            "        <td align=\"center\"><input type=\"text\" id=\"stockprice\" alt=\"Stockprice\" placeholder=\"StockPrice\" class=\"inner-txt-box\"></td>\n" +
+            "        <td align=\"center\"><input type=\"text\" id=\"sellingprice\" alt=\"Sellingprice\" placeholder=\"SellingPrice\" class=\"inner-txt-box\"></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\"><input type=\"text\" id=\"quantity\" placeholder=\"quantity\" class=\"inner-txt-box\"></td>\n" +
+            "        <td align=\"center\"><input type=\"text\" id=\"supplier\" placeholder=\"Supplier\" class=\"inner-txt-box\"></td>\n" +
+            "        <td align=\"center\"><input type=\"text\" id=\"invoicenumber\" placeholder=\"Invoice Number\" class=\"inner-txt-box\"></td>\n" +
+            "    </tr>\n" +
+            "    <tr>\n" +
+            "        <td align=\"center\" colspan=\"3\">\n" +
+            "            <input type=\"button\" value=\"Add\" onclick='Add()' class=\"button\">\n" +
+            "            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+            "            <input type=\"button\" value=\"Done\" class=\"button\" onclick=\"subMenuDone()\">\n" +
+            "        </td>\n" +
+            "    </tr>\n" +
+            "</table>";
+        document.getElementById("sub-menu").innerHTML = rep;
+
+    }
+
+    function Add() {
+        var rep = "";
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stockitems/add/quantity?barcode="+
+            document.getElementById("barcode").value +"&invoicenumber="+
+            document.getElementById("invoicenumber").value +"&supplier="+
+            document.getElementById("supplier").value +"&quantity="+
+            document.getElementById("quantity").value +"&stockprice="+
+            document.getElementById("stockprice").value +"&sellingprice="+
+            document.getElementById("sellingprice").value +"&username="+
+            sessionStorage.getItem("username") +"&storecode="+ sessionStorage.getItem("storecode");
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.success == true) {
+                    rep = "The quantity of the Item has been added";
+                    document.getElementById("resp").innerHTML = rep;
+                }
+            }else{
+                rep = "An error has occured, please contact your administrator";
+                document.getElementById("resp").innerHTML = rep;
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+
+    function Create() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stockitems/insert/item?"
+            + "storeid=" + sessionStorage.getItem("storecode")
+            + "&username=" + sessionStorage.getItem("username")
+            +"&department="+ document.getElementById("department").value
+            +"&category="+ document.getElementById("category").value
+            +"&itemname="+ document.getElementById("itemname").value
+            +"&description="+ document.getElementById("description").value
+            +"&vat="+ document.getElementById("vat").value
+            +"&barcode="+ document.getElementById("barcode").value
+            +"&stockprice="+ document.getElementById("stockprice").value
+            +"&sellingprice="+ document.getElementById("sellingprice").value
+            +"&quantity="+ document.getElementById("quantity").value
+            +"&lowlevel="+ document.getElementById("lowlevel").value
+            +"&location="+ document.getElementById("location").value
+            +"&shelfNumber="+ document.getElementById("shelfnumber").value
+            +"&supplier=" + document.getElementById("supplier").value;
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if(obj.success == true){
+                    myload();
+                }
+            }
+        };
+        xhttp.open("PUT", url, true);
+        xhttp.send();
+    }
+
+    function subMenuDone() {
+        document.getElementById("sub-menu").innerHTML = "";
+        document.getElementById("resp").innerHTML = "";
+        myload();
+    }
+    function createItem() {
+        var rep = "<table width=\"80%\" align=\"center\" border=\"0\">\n" +
+            "        <tr>\n" +
+            "            <td align=\"left\"><input type=\"search\" id=\"department\" placeholder=\"Department\" class = \"inner-txt-box\"></td>\n" +
+            "            <td align=\"center\"><input type=\"search\" id=\"category\" placeholder=\"Category\" class = \"inner-txt-box\"></td>\n" +
+            "            <td align=\"center\"><input type=\"text\" id=\"itemname\" placeholder=\"Itemname\" class = \"inner-txt-box\"></td>\n" +
+            "            <td align=\"right\"><input type=\"text\" id=\"barcode\" placeholder=\"Barcode\" class = \"inner-txt-box\"></td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td align=\"left\" ><input type=\"text\" id=\"description\" placeholder=\"Description\" class = \"inner-txt-box\">\n" +
+            "                </td>\n" +
+            "                <td align=\"center\">\n" +
+            "                <input type=\"text\" id=\"vat\" placeholder=\"Vat\" class=\"inner-txt-box\"></td>\n" +
+            "            <td colspan=\"2\" align=\"right\">\n" +
+            "                <input type=\"text\" id=\"stockprice\" placeholder=\"StockPrice\" class=\"inner-txt-box-small\">\n" +
+            "                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+            "                <input type=\"text\" id=\"sellingprice\" placeholder=\"SellingPrice\" class=\"inner-txt-box-small\">\n" +
+            "                &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;\n" +
+            "                <input type=\"text\" id=\"quantity\" placeholder=\"Quantity\" class=\"inner-txt-box-small\">\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td align=\"left\">\n" +
+            "                <input type=\"text\" id=\"lowlevel\" placeholder=\"LowLevel\" class=\"inner-txt-box\">\n" +
+            "            </td><td align=\"center\">\n" +
+            "                <input type=\"text\" id=\"location\" placeholder=\"Location\" class=\"inner-txt-box\">\n" +
+            "            </td><td align=\"center\">\n" +
+            "                <input type=\"text\" id=\"shelfnumber\" placeholder=\"Shelf\" class=\"inner-txt-box\">\n" +
+            "            </td><td align=\"right\">\n" +
+            "                <input type=\"text\" id=\"supplier\" placeholder=\"Supplier\" class=\"inner-txt-box\">\n" +
+            "            </td>\n" +
+            "        </tr>\n" +
+            "        <tr>\n" +
+            "            <td colspan=\"2\" align=\"center\"><input type=\"button\" onclick='Create()' value=\"Create\" class=\"button\"></td>\n" +
+            "            <td colspan=\"2\" align=\"center\"><input type=\"button\" onclick='subMenuDone()' value=\"Done\" class=\"button\"></td>\n" +
+            "        </tr>\n" +
+            "    </table>";
+        document.getElementById("sub-menu").innerHTML = rep;
+    }
+    function myload() {
+        var xhttp = new XMLHttpRequest();
+        var url = sessionStorage.getItem("host") + "/api/v1/stockitems/stocklist?storecode="+sessionStorage.getItem("storecode")
+            +"&username=" + sessionStorage.getItem("username");
+        var rep = "";
+        xhttp.onreadystatechange = function() {
+            if (this.status == 200) {
+                var response = xhttp.responseText;
+                var obj = JSON.parse(response);
+                if (obj.count > 0) {
+                    rep = "<table bgcolor='#f8f8ff' width=\"100%\" border=\"2\">\n" +
+                        "        <thead>\n" +
+                        "        <tr>\n" +
+                        "            <th>DEPARTMENT</th>\n" +
+                        "            <th>Category</th>\n" +
+                        "            <th>Itemname</th>\n" +
+                        "            <th>Description</th>\n" +
+                        "            <th>Vat</th>\n" +
+                        "            <th>BarCode</th>\n" +
+                        "            <th>StockPrice</th>\n" +
+                        "            <th>SellingPrice</th>\n" +
+                        "            <th>Quantity</th>\n" +
+                        "            <th>LowLevel</th>\n" +
+                        "            <th>Location</th>\n" +
+                        "            <th>ShelfNumber</th>\n" +
+                        "            <th>Supplier</th>\n" +
+                        "        </tr>\n" +
+                        "        </thead>\n" +
+                        "        <tbody>";
+                    var c;
+                    for(c = 0; c < obj.count; c++){
+                        rep += "<tr>";
+                        rep += "<td>" + obj.data[c].department + "</td>";
+                        rep += "<td>" + obj.data[c].category + "</td>";
+                        rep += "<td>" + obj.data[c].itemname + "</td>";
+                        rep += "<td>" + obj.data[c].description + "</td>";
+                        rep += "<td>" + obj.data[c].vat + "</td>";
+                        rep += "<td>" + obj.data[c].barCode + "</td>";
+                        rep += "<td>" + obj.data[c].stockprice + "</td>";
+                        rep += "<td>" + obj.data[c].sellingprice + "</td>";
+                        rep += "<td>" + obj.data[c].quantity + "</td>";
+                        rep += "<td>" + obj.data[c].lowlevel + "</td>";
+                        rep += "<td>" + obj.data[c].location + "</td>";
+                        rep += "<td>" + obj.data[c].shelfnumber + "</td>";
+                        rep += "<td>" + obj.data[c].supplier + "</td>";
+                        rep += "</tr>";
+                    }
+                    rep = rep + "</tbody>\n" +
+                        "    </table>";
+                    document.getElementById("stockitems").innerHTML = rep;
+                }else{
+                    rep = "You do not have any Stockitems";
+                    document.getElementById("stockitems").innerHTML = rep;
+                }
+            }
+        };
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    }
+</script>
+</body>
+</html>

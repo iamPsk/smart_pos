@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Smart-POS | MkokoComputers</title>
+    <link rel = "icon" href ="/img/icon.png" type = "image/x-icon">
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="msapplication-tap-highlight" content="no" />
+    <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+    <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" />
+    <link rel="stylesheet" type="text/css" href="/css/min.css"/>
+    <link rel="stylesheet" type="text/css" href="/css/index.css" />
+    <link rel="stylesheet" type="text/css" href="/css/custom.css" />
+
+</head>
+<body>
+<div id="menu" align="center">
+    <table width="280px" border="2" align="center">
+        <tr>
+            <td align="center"><label for="date">Date:</label><input type="date" value="yyyy-mm-dd" id="date" name="date"></td>
+        </tr>
+        <tr>
+            <td align="center"><input type="button" class="button" value="Search" onclick="GetDailySales()"></td>
+        </tr>
+    </table>
+</div>
+<div id="sub-menu" align="center">
+
+</div>
+<div id="sales-list">
+</div>
+<div id="footer" align="center">
+
+</div>
+
+<script type="text/javascript">
+function GetDailySum() {
+    var xhttp = new XMLHttpRequest();
+    var url = sessionStorage.getItem("host") + "/api/v1/sales/daily/total?storecode="+
+        sessionStorage.getItem("storecode") + "&saleDate="+ document.getElementById("date").value ;
+    var rep = "";
+    xhttp.onreadystatechange = function() {
+        if (this.status == 200) {
+            var response = xhttp.responseText;
+            var obj = JSON.parse(response);
+            if (obj.success == true) {
+                rep = "<p><b>Total R: ";
+                rep += obj.data;
+                rep += "</b></p>";
+                document.getElementById("footer").innerHTML = rep;
+            } else {
+                rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                document.getElementById("sub-menu").innerHTML = rep;
+            }
+        }
+    };
+    xhttp.open("GET", url, true);
+    xhttp.send();
+}
+function GetDailySales() {
+    var xhttp = new XMLHttpRequest();
+    var url = sessionStorage.getItem("host") + "/api/v1/sales/daily?storecode="+
+        sessionStorage.getItem("storecode") + "&saleDate="+ document.getElementById("date").value;
+    var rep = "";
+    xhttp.onreadystatechange = function() {
+        if (this.status == 200) {
+            var response = xhttp.responseText;
+            var obj = JSON.parse(response);
+            if (obj.success == true) {
+                rep = "<table align='center' class=\"table-general\" border=\"2\" width=\"85%\">\n" +
+                    "        <tr>\n" +
+                    "            <th>Date</th>\n" +
+                    "            <th>Itemname</th>\n" +
+                    "            <th>Amount</th>\n" +
+                    "        </tr>\n" +
+                    "    </thead>";
+                var c;
+                for(c = 0; c < obj.count; c++){
+                    rep += "<tr>";
+                    rep += "<td>" + obj.data[c].saleDate + " | " + obj.data[c].saleTime;
+                    rep += "<td>" + obj.data[c].itemname + "</td>";
+                    rep += "<td>" + obj.data[c].amount + "</td>";
+                }
+                rep += "</tr>";
+                rep += "</table>";
+                document.getElementById("sales-list").innerHTML = rep;
+                GetDailySum();
+            } else {
+                rep = "Success: " + obj.success + " Code: " + obj.code + "</br>Error Message: " + obj.data;
+                document.getElementById("sub-menu").innerHTML = rep;
+            }
+        }
+    };
+    xhttp.open("GET", url, true);
+    xhttp.send();
+}
+</script>
+
+</body>
+</html>
