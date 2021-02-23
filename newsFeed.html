@@ -1,51 +1,429 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="utf-8" />
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="msapplication-tap-highlight" content="no" />
-    <meta name="viewport"
-          content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
-    <!-- <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /> -->
-    <link rel="stylesheet" type="text/css" href="css/min.css" />
-    <link rel="stylesheet" type="text/css" href="css/index.css" />
-    <link rel="stylesheet" type="text/css" href="css/custom.css" />
-    <title>Smart-POS | MkokoComputers</title>
-    <link rel = "icon" href ="img/icon.png" type = "image/x-icon">
+  <meta charset="utf-8" />
+  <meta name="format-detection" content="telephone=no" />
+  <meta name="msapplication-tap-highlight" content="no" />
+  <meta name="viewport"
+    content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+  <!-- <meta http-equiv="Content-Security-Policy" content="default-src * 'unsafe-inline'; style-src 'self' 'unsafe-inline'; media-src *" /> -->
+  <link rel="stylesheet" type="text/css" href="css/min.css" />
+  <link rel="stylesheet" type="text/css" href="css/index.css" />
+  <link rel="stylesheet" type="text/css" href="css/custom.css" />
+  <title>Smart-POS | MkokoComputers</title>
+  <link rel="icon" href="img/icon.png" type="image/x-icon">
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    .btn-primary{
+      transition: all 0.2s;
+      outline: none;
+    }
+
+    .btn-primary:hover {
+      color: #fff;
+      background-color: #2aa1a4;
+      border-color: #2aa1a4;
+      box-shadow: 0 2px 4px 0 #000;
+    }
+
+    .btn-primary:active{
+      color: #fff;
+      background-color: #2aa1a4 !important;
+      border-color: #2aa1a4 !important;
+      box-shadow: 0 4px 8px 0 #000;
+    }
+
+    .card:hover{
+      box-shadow: 0 4px 8px 0 #000;
+    }
+
+
+    body > section > div.main-side > div > div.side-card-body > div form{
+        padding: 1em;
+        max-width: 100%;
+        width: 100%;
+      }
+
+
+    
+  </style>
 </head>
+
+
+
+
 <body>
-<section class="main">
+  <section class="main">
     <div class="main-side">
-        <div class="side-card">
-            <div class="side-card-header">
-                Filter
-                <span class="material-icons">zoom_in</span>
-            </div>
-            <div class="side-card-body">
-                <p>Account Name</p>
-                <p>Chows and Eats</p>
-                <p>Suppliers</p>
-                <p>4</p>
-                <p>Subscriptions</p>
-                <p>9</p>
-            </div>
+      <div class="side-card">
+        <div class="side-card-header">
+          Filter by
+          <span class="material-icons">zoom_in</span>
         </div>
+        <div class="side-card-body">
+          <div class="newsfeed-filter">
+
+            <!-- Tab links -->
+            <div class="tab">
+              <button class="tablinks" id="defaultOpen" onclick="openTab(event, 'newsfeed')">newsfeed</button>
+              <button class="tablinks" onclick="openTab(event, 'industry')">industry</button>
+              <button class="tablinks" onclick="openTab(event, 'location')">location</button>
+            </div>
+
+            <!-- Tab content -->
+            <div id="newsfeed" class="tabcontent">
+              <form class="login-form">
+                <div class="igroup">
+                  <label for="continents">Continents</label>
+                  <input type="text" id="continents" aria-describedby="continents">
+                </div>
+                <div class="igroup">
+                  <label for="countries">Countries</label>
+                  <input type="text" id="countries" aria-describedby="emailHelp">
+                </div>
+                <div class="igroup">
+                  <label for="provinces">Provinces</label>
+                  <input type=text id="exampleInputPassword1">
+                </div>
+                <div class="igroup">
+                  <label for="towns">Towns</label>
+                  <input type="text" id="towns" aria-describedby="town">
+                </div>
+                <div class="igroup">
+                  <label for="locations">Locations</label>
+                  <input type="text" id="locations">
+                </div>
+                <input class="m-auto" type="submit" value="Search" onclick="Loggin()">
+              </form>
+
+            </div>
+
+            <div id="industry" class="tabcontent">
+              <form class="login-form">
+                <div class="igroup">
+                  <label for="continents">Continents</label>
+                  <input type="text" id="continents" aria-describedby="continents">
+                </div>
+                <div class="igroup">
+                  <label for="countries">Countries</label>
+                  <input type="text" id="countries" aria-describedby="emailHelp">
+                </div>
+                <div class="igroup">
+                  <label for="provinces">Provinces</label>
+                  <input type=text id="exampleInputPassword1">
+                </div>
+                <div class="igroup">
+                  <label for="towns">Towns</label>
+                  <input type="text" id="towns" aria-describedby="town">
+                </div>
+                <div class="igroup">
+                  <label for="locations">Locations</label>
+                  <input type="text" id="locations">
+                </div>
+                <input class="m-auto" type="submit" value="Search" onclick="Loggin()">
+              </form>
+
+            </div>
+
+            <div id="location" class="tabcontent">
+              <form class="login-form">
+                <div class="igroup">
+                  <label for="continents">Continents</label>
+                  <input type="text" id="continents" aria-describedby="continents">
+                </div>
+                <div class="igroup">
+                  <label for="countries">Countries</label>
+                  <input type="text" id="countries" aria-describedby="emailHelp">
+                </div>
+                <div class="igroup">
+                  <label for="provinces">Provinces</label>
+                  <input type=text id="exampleInputPassword1">
+                </div>
+                <div class="igroup">
+                  <label for="towns">Towns</label>
+                  <input type="text" id="towns" aria-describedby="town">
+                </div>
+                <div class="igroup">
+                  <label for="locations">Locations</label>
+                  <input type="text" id="locations">
+                </div>
+                <input class="m-auto" type="submit" value="Search" onclick="Loggin()">
+              </form>
+            </div>
+
+
+
+          </div>
+
+        </div>
+      </div>
     </div>
     <div class="main-container">
-        <header>
-            <h1 style="margin-bottom: 0.5em;">For Processing all results</h1>
-            <p>I will be showing all for every touch</p>
-            <ul style="font-size: 18px;">
-                <li>News Feed</li>
-                <li>Find Items</li>
-                <li>Find Industry</li>
-            </ul>
+      <div class="row">
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Special title treatment</h5>
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="btn btn-primary">View Store</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Special title treatment</h5>
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="btn btn-primary">View Store</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Special title treatment</h5>
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="btn btn-primary">View Store</a>
+            </div>
+          </div>
+        </div>
+        <div class="col-sm-6">
+          <div class="card">
+            <div class="card-body">
+              <h5 class="card-title">Special title treatment</h5>
+              <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+              <a href="#" class="btn btn-primary">View Store</a>
+            </div>
+          </div>
+        </div>
+        <div class="custom-pager">
+          <a href="">&laquo;</a>
+          <a href="">1</a>
+          <a href="" class="active">2</a>
+          <a href="">3</a>
+          <a href="">&raquo;</a>
+        </div>
+        <div id="myModal" class="custom-modal">
 
-            <p>We'd love to hear from you, if you have any questions or feedback <a href="">please let us know!</a>
-                To get going fast follow the prompts in the grey highlighted section below.</p>
-        </header>
+          <!-- Modal content -->
+          <div class="custom-modal-content">
+            <span class="custom-close">&times;</span>
+            <div class="card-columns">
+              <div class="card">
+                <img class="card-img-top" src="..." alt="Card image cap">
+                <div class="card-body">
+                  <h5 class="card-title">Card title that wraps to a new line</h5>
+                  <p class="card-text">This is a longer card with supporting text below as a natural lead-in to
+                    additional content. This content is a little bit longer.</p>
+                </div>
+              </div>
+              <div class="card p-3">
+                <blockquote class="blockquote mb-0 card-body">
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                  <footer class="blockquote-footer">
+                    <small class="text-muted">
+                      Someone famous in <cite title="Source Title">Source Title</cite>
+                    </small>
+                  </footer>
+                </blockquote>
+              </div>
+              <div class="card">
+                <img class="card-img-top" src="..." alt="Card image cap">
+                <div class="card-body">
+                  <h5 class="card-title">Card title</h5>
+                  <p class="card-text">This card has supporting text below as a natural lead-in to additional
+                    content.</p>
+                  <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                </div>
+              </div>
+              <div class="card bg-primary text-white text-center p-3">
+                <blockquote class="blockquote mb-0">
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat.</p>
+                  <footer class="blockquote-footer">
+                    <small>
+                      Someone famous in <cite title="Source Title">Source Title</cite>
+                    </small>
+                  </footer>
+                </blockquote>
+              </div>
+              <div class="card text-center">
+                <div class="card-body">
+                  <h5 class="card-title">Card title</h5>
+                  <p class="card-text">This card has supporting text below as a natural lead-in to additional
+                    content.</p>
+                  <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                </div>
+              </div>
+              <div class="card">
+                <img class="card-img" src="..." alt="Card image">
+              </div>
+              <div class="card p-3 text-right">
+                <blockquote class="blockquote mb-0">
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                  <footer class="blockquote-footer">
+                    <small class="text-muted">
+                      Someone famous in <cite title="Source Title">Source Title</cite>
+                    </small>
+                  </footer>
+                </blockquote>
+              </div>
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">Card title</h5>
+                  <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                    additional content. This card has even longer content than the first to show that equal height
+                    action.</p>
+                  <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                </div>
+              </div>
+              <div class="card">
+                <img class="card-img-top" src="..." alt="Card image cap">
+                <div class="card-body">
+                  <h5 class="card-title">Card title that wraps to a new line</h5>
+                  <p class="card-text">This is a longer card with supporting text below as a natural lead-in to
+                    additional content. This content is a little bit longer.</p>
+                </div>
+              </div>
+              <div class="card p-3">
+                <blockquote class="blockquote mb-0 card-body">
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                  <footer class="blockquote-footer">
+                    <small class="text-muted">
+                      Someone famous in <cite title="Source Title">Source Title</cite>
+                    </small>
+                  </footer>
+                </blockquote>
+              </div>
+              <div class="card">
+                <img class="card-img-top" src="..." alt="Card image cap">
+                <div class="card-body">
+                  <h5 class="card-title">Card title</h5>
+                  <p class="card-text">This card has supporting text below as a natural lead-in to additional
+                    content.</p>
+                  <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                </div>
+              </div>
+              <div class="card bg-primary text-white text-center p-3">
+                <blockquote class="blockquote mb-0">
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat.</p>
+                  <footer class="blockquote-footer">
+                    <small>
+                      Someone famous in <cite title="Source Title">Source Title</cite>
+                    </small>
+                  </footer>
+                </blockquote>
+              </div>
+              <div class="card text-center">
+                <div class="card-body">
+                  <h5 class="card-title">Card title</h5>
+                  <p class="card-text">This card has supporting text below as a natural lead-in to additional
+                    content.</p>
+                  <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                </div>
+              </div>
+              <div class="card">
+                <img class="card-img" src="..." alt="Card image">
+              </div>
+              <div class="card p-3 text-right">
+                <blockquote class="blockquote mb-0">
+                  <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere erat a ante.</p>
+                  <footer class="blockquote-footer">
+                    <small class="text-muted">
+                      Someone famous in <cite title="Source Title">Source Title</cite>
+                    </small>
+                  </footer>
+                </blockquote>
+              </div>
+              <div class="card">
+                <div class="card-body">
+                  <h5 class="card-title">Card title</h5>
+                  <p class="card-text">This is a wider card with supporting text below as a natural lead-in to
+                    additional content. This card has even longer content than the first to show that equal height
+                    action.</p>
+                  <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+      <header>
+        <h1 style="margin-bottom: 0.5em; font-weight: 400;">For Processing all results</h1>
+        <p>I will be showing all for every touch</p>
+        <ul>
+          <li>News Feed</li>
+          <li>Find Items</li>
+          <li>Find Industry</li>
+        </ul>
+
+        <p>We'd love to hear from you, if you have any questions or feedback <a href="">please let us know!</a>
+          To get going fast follow the prompts in the grey highlighted section below.</p>
+      </header>
     </div>
+  </section>
+  <script>
 
-</section>
+    let modal = document.getElementById("myModal");
+    let row = document.querySelector('.row')
+    let span = document.getElementsByClassName("custom-close")[0];
+
+// show modal if button clicked on a card in row
+
+    row.onclick = (evt) => {
+
+      if (evt.target.classList.contains('btn')) {
+
+        modal.style.display = "block";
+
+      }
+    }
+
+    span.onclick = function () {
+      modal.style.display = "none";
+    }
+
+    // When the user clicks anywhere outside of the mymodal, close it
+    window.onclick = function (event) {
+      if (event.target == modal) {
+        modal.style.display = "none";
+      }
+    }
+
+
+    function openTab(evt, cityName) {
+      // Declare all variables
+      var i, tabcontent, tablinks;
+
+      // Get all elements with class="tabcontent" and hide them
+      tabcontent = document.getElementsByClassName("tabcontent");
+      for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+      }
+
+      // Get all elements with class="tablinks" and remove the class "active"
+      tablinks = document.getElementsByClassName("tablinks");
+      for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+      }
+
+      // Show the current tab, and add an "active" class to the button that opened the tab
+      document.getElementById(cityName).style.display = "block";
+      evt.currentTarget.className += " active";
+    }
+
+    // show a tab by default
+    document.getElementById("defaultOpen").click();
+
+
+
+  </script>
+
 </body>
+
 </html>

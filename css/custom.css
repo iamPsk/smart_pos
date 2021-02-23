@@ -1,4 +1,4 @@
-b .inner-txt-box {
+.inner-txt-box {
   color: lightgrey;
   width: 200px;
 }
@@ -82,11 +82,15 @@ b .inner-txt-box {
 }
 
 .nav-top {
-  align-items: center;
+  overflow: hidden;
+  background-color: #f1f1f1;
+  padding: 0 1em;
+  /* align-items: center;
   background-color: #fff;
   padding: 1em;
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap;
+  justify-content: space-between; */
 }
 
 .personal-top {
@@ -95,30 +99,6 @@ b .inner-txt-box {
 .nav-brand {
   display: flex;
   align-items: baseline;
-}
-
-/* .login-btns a {
-    position: relative;
-    font-size: 12px;
-    border: 1px solid #1266f1;
-    text-transform: uppercase;
-    padding: 15px 45px 14px;
-    font-weight: 500;
-    box-shadow: 0 2px 5px 0 rgb(0 0 0 / 20%), 0 2px 10px 0 rgb(0 0 0 / 10%);
-    text-decoration: none;
-    text-align: center;
-    transition: all 0.3s;
-    background-color: #1266f1;
-    color: #fff;
-    line-height: 1;
-    border-radius: .25rem;
-    margin-bottom: 1em;
-    margin-left: 1em;
-} */
-
-.login-btns a:hover,
-.login-type a:hover {
-  box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
 }
 
 .form-layout {
@@ -144,6 +124,7 @@ b .inner-txt-box {
 .login-header {
   margin-bottom: 1em;
   text-align: center;
+  color: #c1c1c1;
   font-size: 2rem;
 }
 
@@ -207,7 +188,7 @@ b .inner-txt-box {
 input[type="submit"] {
   font-size: 12px;
   width: 180px;
-  border: 1px solid #1266f1;
+  border: 1px solid #2aa1a4;
   text-transform: uppercase;
   padding: 15px 29px 14px;
   font-weight: 500;
@@ -215,7 +196,7 @@ input[type="submit"] {
   text-decoration: none;
   text-align: center;
   transition: all 0.3s;
-  background-color: #1266f1;
+  background-color: #2aa1a4;
   color: #fff;
   line-height: 1;
   border-radius: 0.25rem;
@@ -223,20 +204,7 @@ input[type="submit"] {
   margin-left: 1em;
 }
 
-.login-type {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 1em;
-  width: 100%;
-}
-
-.brand-buttons {
-  display: none !important;
-}
-
-.login-type a,
-.login-btns a,
-.brand-buttons a {
+.login-btn {
   font-size: 12px !important;
   text-transform: uppercase;
   padding: 15px 45px 14px;
@@ -244,30 +212,35 @@ input[type="submit"] {
   box-shadow: 0 2px 5px 0 rgb(0 0 0 / 20%), 0 2px 10px 0 rgb(0 0 0 / 10%);
   text-decoration: none;
   text-align: center;
-  transition: all 0.3s;
-  background-color: #1266f1;
+  transition: all 0.1s;
+  border: 1px solid #2aa1a4;
+  background-color: #2aa1a4;
   color: #fff;
   line-height: 1;
   border-radius: 0.25rem;
   position: relative;
 }
 
-body > div.nav-top > div.login-btns > a:nth-child(1),
-body > div.form-layout > div > a:nth-child(1) {
-  margin-right: 1em;
-}
-.login-type a:last-child {
-  background-color: #fff;
-  color: #000;
-  margin-left: 8px;
-}
-
-.login-type a span,
-.login-btns a span {
+.login-btn span {
   position: absolute;
   top: 7.5px;
   left: 16px;
-  /* font-size: 1.5rem; */
+}
+
+.login-btn:hover{
+  box-shadow: 0 2px 5px 0 rgb(0 0 0 / 40%), 0 2px 10px 0 rgb(0 0 0 / 30%);
+  color: #fff;
+  text-decoration: none;
+}
+
+.login-btn:active{
+  border-color: #073642;
+  background-color: #073642;
+  /* border-width: 2px; */
+}
+
+body > div.nav-top > div > a:nth-child(1){
+  margin-right: 0.5rem;
 }
 
 input {
@@ -311,12 +284,12 @@ input {
 }
 
 .card-columns {
-  padding: 2em 1em;
+  padding: 1em;
 }
 
 .main {
   display: flex;
-  padding: 2em 1em 6em;
+  padding: 2em 1em;
   background-color: #fff;
   justify-content: space-around;
   flex-wrap: wrap;
@@ -370,22 +343,19 @@ input {
 }
 
 .side-card-header {
+  position: relative;
   font-size: 18px;
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
   padding: 8px 16px;
   background-color: #073642;
-  border-top-right-radius: 2px;
-  border-top-left-radius: 2px;
+  border-top-right-radius: inherit;
+  border-top-left-radius: inherit;
   color: #fff;
 }
 
-.side-card-body {
-  padding: 1em 1.5em;
-}
-
 .side-card-body p {
+  color: #073642;
+  padding: 0 4px 12px;
+  font-size: 1.1rem;
   padding: 0;
   margin: 0;
   display: flex;
@@ -402,19 +372,12 @@ input {
 }
 
 body
-> section
-> div.main-side
-> div:nth-child(2)
-> div.side-card-body
-> p:nth-child(odd) {
+  > section
+  > div.main-side
+  > div:nth-child(2)
+  > div.side-card-body
+  > p:nth-child(odd) {
   padding-left: 2em;
-}
-
-.side-card-body p:nth-child(2n) {
-  color: #073642;
-  padding: 0 4px 12px;
-  font-size: 1.1rem;
-  font-weight: bold;
 }
 
 .side-list li p:last-child {
@@ -500,12 +463,10 @@ nav {
 
 /* Remove extra left and right margins, due to padding in columns */
 .footer {
-  /* margin: 0 -5px; */
-  /* padding: 1em; */
   background-color: #073642;
 }
 
-.footer h1{
+.footer h1 {
   font-size: 2rem !important;
 }
 
@@ -551,11 +512,6 @@ body > p {
   background-color: #073642;
   padding: 2em;
   margin: 0;
-}
-.dropmenu {
-  /* position: relative; */
-  /* float: left; */
-  /* overflow: hidden; */
 }
 
 .dropmenu .dropbtn {
@@ -615,8 +571,9 @@ body > p {
   display: none;
 }
 
-body > section > div.main-container > header{
+body > section > div.main-container > header {
   padding: 2em;
+  font-weight: 300;
 }
 
 .filter-content a {
@@ -625,6 +582,223 @@ body > section > div.main-container > header{
   border-radius: 1rem;
   background-color: white;
   color: black;
+}
+
+.custom-row {
+  padding: 1em;
+  position: relative;
+}
+
+.custom-card {
+  float: left;
+  width: 30%;
+  margin-left: 1em;
+  padding: 1em;
+  border-radius: 4px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
+}
+
+/* Clear floats after the columns */
+.custom-row:after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.custom-pager {
+  position: absolute;
+  bottom: 0.5em;
+  right: 4em;
+  padding-top: 1em;
+  /* border: 1px solid #000; */
+}
+
+.custom-pager > a {
+  margin: 0;
+  overflow: visible;
+  text-transform: none;
+  display: inline-block;
+  font-weight: 400;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: none;
+  border: 1px solid transparent;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+  margin-bottom: 1em;
+  text-decoration: none;
+  color: #839496;
+}
+
+.custom-pager a.active {
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.4);
+  border-radius: 5px;
+  background-color: #2aa1a4;
+  color: #fff;
+}
+
+.custom-pager a:hover:not(.active) {
+  background-color: #ddd;
+  border-radius: 5px;
+}
+
+/* The Modal (background) */
+.custom-modal {
+  display: none;
+  /* Hidden by default */
+  position: fixed;
+  /* Stay in place */
+  justify-content: center;
+  align-items: center;
+  z-index: 1;
+  /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%;
+  /* Full width */
+  height: 100%;
+  /* Full height */
+  overflow: auto;
+  /* Enable scroll if needed */
+  background-color: rgb(0, 0, 0);
+  /* Fallback color */
+  background-color: rgba(0, 0, 0, 0.4);
+  /* Black w/ opacity */
+}
+
+/* Modal Content/Box */
+.custom-modal-content {
+  background-color: #073642;
+  margin: 2% auto;
+  /* 15% from the top and centered */
+  /* padding: 20px; */
+  border: 1px solid #073642;
+  width: 90%;
+  /* Could be more or less, depending on screen size */
+  box-shadow: 0 4px 8px 0 #000000;
+  /* background: white; */
+  border-radius: .25rem;
+}
+
+/* The Close Button */
+.custom-close {
+  display: block;
+  color: #2aa198;
+  /* float: right; */
+  font-size: 28px;
+  font-weight: bold;
+  /* border: 1px solid #ffffff; */
+  text-align: right;
+  padding: 0 .75rem .25rem;
+  /* background-color: #073642; */
+  /* border: 1px solid black; */
+}
+
+.custom-close:hover,
+.custom-close:focus {
+  color: black;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.row {
+  padding: 1em 0 4em;
+  position: relative;
+  margin: 0;
+  background-color: #073642;
+  border-top-right-radius: inherit;
+  border-top-left-radius: inherit;
+}
+
+.card {
+  border-color: #ffffff;
+  margin-bottom: 1em;
+  box-shadow: 0 2px 4px 0 rgb(0 0 0 / 40%);
+  background-color: #ffffff;
+  color: #073642;
+  transition: all 0.2s;
+  border-radius: 5px;
+}
+
+.card-columns .card{
+  /* background-color: #073642; */
+  /* color: white; */
+  /* border-color: #073642; */
+  box-shadow: 0 4px 8px #0000008f;
+}
+/* Style the tab */
+.tab {
+  display: flex;
+  list-style: none;
+  margin-bottom: 1rem !important;
+}
+
+/* Style the buttons that are used to open the tab content */
+.tab button {
+  flex: 1 1 auto;
+  font-size: 12px;
+  border: 1px solid transparent;
+  text-transform: uppercase;
+  padding: 15px 0 14px;
+  font-weight: 500;
+  text-align: center;
+  transition: all 0.3s;
+  background-color: transparent;
+  line-height: 1;
+  outline: none;
+  color: #073642;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+  background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+  /* border-top-color: white; */
+  background-color: #2aa1a4;
+  color: #fff;
+  box-shadow: 0 3px 5px 0 rgb(0 0 0 / 20%), 0 2px 10px 0 rgb(0 0 0 / 10%);
+}
+
+/* Style the tab content */
+.tabcontent {
+  display: none;
+  animation: fadeEffect 1s;
+}
+
+body > section > div.main-side > div > div.side-card-body > div form {
+  box-shadow: none;
+  width: 100%;
+  padding: 0.5em;
+}
+
+body > section > div.main-container > div > div > div a{
+  background-color:#2aa1a4;
+  border-color: #2aa1a4;
+}
+
+body > section > div.main-side > div > div.side-card-header > span {
+  position: absolute;
+  right: 16px;
+  bottom: 10px;
+}
+
+/* Go from zero to full opacity */
+@keyframes fadeEffect {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 /* Responsive columns - one column layout (vertical) on small screens */
 @media screen and (max-width: 600px) {
@@ -644,6 +818,12 @@ body > section > div.main-container > header{
     margin-bottom: 1.5em;
   }
   .main-side {
+    width: 100%;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  .custom-card {
     width: 100%;
   }
 }
